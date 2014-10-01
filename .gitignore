@@ -1,0 +1,3 @@
+# ignore python bytecode,
+*.pyc
+# ignore the xml file created by cp2k
