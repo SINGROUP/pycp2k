@@ -26,6 +26,7 @@ Usage:
 Here is an example of a cp2k input file creation with cp2kase. 
 
 Important notes:
+
 1. Section names 'X' that start with a numeric value have been renamed to 'NUMX'. This is because python doesn't support variable names which start with numbers
 2. Sections and keywords which include the plus sign '+' have been renamed so that it is replaced by 'PLUS'. This is because python doesn't allow the plus sign within variable names.
 3. Sections and keywords which include the minus/hyphen sign '-' have been renamed so that it is replaced by 'HYPMIN'. This is because python doesn't allow the minus/hyphen sign within variable names.
