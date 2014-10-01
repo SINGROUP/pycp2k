@@ -9,10 +9,10 @@ Installation:
 These installation instructions were tested on Ubuntu 14.04 x64:
 
 1. This package depends on the numpy and ASE packages. Please install them first.
-  1. [Full SciPy stack](http://www.scipy.org/install.html)
-  2. [ASE](https://wiki.fysik.dtu.dk/ase/)
+1. [Full SciPy stack](http://www.scipy.org/install.html)
+   2. [ASE](https://wiki.fysik.dtu.dk/ase/)
 2. Pull this repository to any location on your computer.
-  1.
+   1.
 
         ```
         git clone https://github.com/lauri-codes/cp2kase.git
@@ -23,3 +23,12 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 ```
     sudo python setup.py install
 ```
+1. We can put fenced code blocks inside nested bullets, too.
+   1. Like this:
+
+        ```c
+        printf("Hello, World!");
+        ```
+
+   2. The key is to indent your fenced block by **(4 * bullet_indent_level)** spaces.
+   3. Also need to put a separating newline above and below the fenced block.
