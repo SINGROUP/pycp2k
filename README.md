@@ -32,4 +32,4 @@ Important notes:
 3. Sections and keywords which include the plus sign '+' have been renamed so that it is replaced by 'PLUS'. This is because python doesn't allow the plus sign within variable names.
 4. Sections and keywords which include the minus/hyphen sign '-' have been renamed so that it is replaced by 'HYPMIN'. This is because python doesn't allow the minus/hyphen sign within variable names.
 5. By default there is one accessable object for each section, repeatable or not. If you want to add more than one repeatable sections, you must use the 'add[SECTION NAME]' function. This function returns a reference to the newly created section object which you should store into a new variable for later access.
-6. If you use aliases, use the same alias always within one script!
+6. If you use aliases, use the same alias always within one script! Alias values are not linked because of string immutability.
