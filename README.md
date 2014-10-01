@@ -12,7 +12,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 1. [Full SciPy stack](http://www.scipy.org/install.html)
    2. [ASE](https://wiki.fysik.dtu.dk/ase/)
 2. Pull this repository to any location on your computer.
-   1.
+   1. Like this:
 
         ```
         git clone https://github.com/lauri-codes/cp2kase.git
