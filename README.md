@@ -20,3 +20,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 ```
    sudo python setup.py install
 ```
+
+Usage:
+------------------
+Here is an example of a cp2k input file creation with cp2kase. 
