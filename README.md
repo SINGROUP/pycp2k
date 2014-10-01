@@ -23,3 +23,12 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 ```
     sudo python setup.py install
 ```
+1. We can put fenced code blocks inside nested bullets, too.
+   1. Like this:
+
+        ```c
+        printf("Hello, World!");
+        ```
+
+   2. The key is to indent your fenced block by **(4 * bullet_indent_level)** spaces.
+   3. Also need to put a separating newline above and below the fenced block.
