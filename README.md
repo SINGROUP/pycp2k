@@ -1,7 +1,7 @@
 pycp2k
 ==================
 
-**WORK IN PROGRESS: USE AT YOUR OWN RISK**
+**WORK IN PROGRESS!**
 
 A python package that provides a python interface to CP2K, an atomistic and molecular simulation software.
 
