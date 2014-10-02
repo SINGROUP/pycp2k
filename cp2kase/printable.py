@@ -17,6 +17,7 @@ class printable(object):
         self.inp_name = ""
 
     def print_input(self, level):
+
         inp = ""
         # Non-repeatable default keywords
         for attname, realname in self.default_keywords:
@@ -67,8 +68,9 @@ class printable(object):
                     if substring != "":
                         inp += substring + ""
 
-        # Header and footer
-        if inp != "":
+        # Don't print the CP2K_INPUT root
+        if level != -1:
+            # Header and footer
             has_section_parameter = False
             inp_header = level * "  " + "&" + self.name
             if hasattr(self, "_SECTION_PARAMETERS"):
@@ -78,6 +80,10 @@ class printable(object):
             if not has_section_parameter:
                 inp_header += "\n"
             inp_footer = level * "  " + "&END " + self.name
-            return inp_header + inp + inp_footer
+
+            if not has_section_parameter and inp == "":
+                return ""
+            else:
+                return inp_header + inp + inp_footer
         else:
-            return ""
+            return inp

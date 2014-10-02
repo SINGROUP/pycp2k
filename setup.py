@@ -1,4 +1,11 @@
 from setuptools import setup
+import inputparser
+
+
+#===============================================================================
+# START SETUP
+print "Parsing the cp2k input structure:"
+inputparser.main()
 
 setup(name='cp2kase',
       version='0.1',
@@ -9,4 +16,3 @@ setup(name='cp2kase',
       license='GPL3',
       packages=['cp2kase'],
       zip_safe=False)
-

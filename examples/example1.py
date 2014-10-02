@@ -2,6 +2,7 @@
 
 from cp2kase.cp2k import CP2K
 from ase import Atom, Atoms
+import os
 
 #===============================================================================
 # Create the atomic structure here
@@ -18,12 +19,18 @@ atoms.append(Atom("Si", [4.073023100, 4.073023100, 1.357674400]))
 
 #===============================================================================
 # Create input tree
+script_path = os.path.dirname(os.path.realpath(__file__))
+project_name = "Si_bulk8"
 calc = CP2K()
+calc.set_input_path(script_path + "/" + project_name + ".inp")
+calc.set_output_path(script_path + "/" + project_name + ".out")
+calc.mpi_n_processes = 2
 
 # Create shortcuts for the most used subtrees of the input
 CP2K_INPUT = calc.CP2K_INPUT
 GLOBAL = CP2K_INPUT.GLOBAL
 FORCE_EVAL = CP2K_INPUT.FORCE_EVAL
+SUBSYS = FORCE_EVAL.SUBSYS
 DFT = FORCE_EVAL.DFT
 SCF = DFT.SCF
 
@@ -54,15 +61,16 @@ SCF.MIXING._NBROYDEN = 8
 FORCE_EVAL.PRINT.FORCES._SECTION_PARAMETERS = "ON"
 
 # Add basis set and potential for Si atoms
-SI = FORCE_EVAL.SUBSYS.KIND
+SI = SUBSYS.KIND
 SI._SECTION_PARAMETERS = "Si"
+SI._ELEMENT = "Si"
 SI._BASIS_SET = "DZVP-GTH-PADE"
 SI._POTENTIAL = "GTH-PADE-q4"
 
 #===============================================================================
-# Create the coordinates and cell automatically from the Atoms object
-calc.add_atoms_to_force_eval(FORCE_EVAL, atoms)
+# Create the coordinates, velocities and cell automatically from the Atoms object
+calc.create_subsys_from_atoms(SUBSYS, atoms)
 
 #===============================================================================
-# Print the input file
-calc.create_input_file()
+# Run the input script
+calc.run()

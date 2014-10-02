@@ -5,6 +5,7 @@
 
 from cp2kase.parsedclasses import CP2K_INPUT1
 from ase.calculators.interface import Calculator
+from subprocess import call
 
 
 #===============================================================================
@@ -23,16 +24,28 @@ class CP2K(Calculator):
     Attributes:
 
     """
-    def __init__(self):
+    def __init__(self, input_path=None, output_path=None):
         """Construct CP2K-calculator object."""
-        self.CP2K_INPUT = CP2K_INPUT1()  # Testing documentation
+        self.CP2K_INPUT = CP2K_INPUT1()
+        self.input_path = input_path
+        self.output_path = output_path
+        self.cp2k_command = "cp2k"
+        self.cp2k_flags = {}
+        self.mpi_on = True
+        self.mpi_flags = {}
+        self.mpi_n_processes = None
+        self.mpi_command = "mpirun"
 
     def __del__(self):
         """Destructor"""
 
-    def set_atoms(self, atoms):
-        """Set the given ASE Atoms object as the SUBSYS for the CP2K input file."""
-        self.atoms = atoms.copy()
+    def set_input_path(self, input_path):
+        """Set the path where all the input an."""
+        self.input_path = input_path
+
+    def set_output_path(self, output_path):
+        """Set the path where all the input an."""
+        self.output_path = output_path
 
     def calculation_required(atoms, quantities):
         """Check if a calculation is required.
@@ -60,25 +73,65 @@ class CP2K(Calculator):
     def get_stress(atoms):
         """Return the stress."""
 
-    def add_atoms_to_force_eval(self, force_eval, atoms):
+    def create_subsys_from_atoms(self, subsys, atoms):
         """Create a CELL entry from the Atoms object.
         """
         for atom in atoms:
-            force_eval.SUBSYS.COORD.add_DEFAULT_KEYWORD(atom.symbol + " " + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]))
+            subsys.COORD.add_DEFAULT_KEYWORD(atom.symbol + " " + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]))
         cell = atoms.get_cell()
         A = cell[0, :]
         B = cell[1, :]
         C = cell[2, :]
-        force_eval.SUBSYS.CELL._A = " " + str(A[0]) + " " + str(A[1]) + " " + str(A[2])
-        force_eval.SUBSYS.CELL._B = " " + str(B[0]) + " " + str(B[1]) + " " + str(B[2])
-        force_eval.SUBSYS.CELL._C = " " + str(C[0]) + " " + str(C[1]) + " " + str(C[2])
+        subsys.CELL._A = " " + str(A[0]) + " " + str(A[1]) + " " + str(A[2])
+        subsys.CELL._B = " " + str(B[0]) + " " + str(B[1]) + " " + str(B[2])
+        subsys.CELL._C = " " + str(C[0]) + " " + str(C[1]) + " " + str(C[2])
 
-    def create_input_file(self):
+    def write_input_file(self):
         """Creates an input file for CP2K executable from the object tree
         defined in CP2K_INPUT
         """
-        print self.CP2K_INPUT.print_input(0)
+        cp2k_input = self.CP2K_INPUT.print_input(-1)
 
+        # Use one of the aliases for project name
+        project_name = self.CP2K_INPUT.GLOBAL._PROJECT
+        if project_name is None:
+            project_name = self.CP2K_INPUT.GLOBAL._PROJECT_NAME
+
+        # Write the file
+        with open(self.input_path, 'w') as input_file:
+            input_file.write(cp2k_input)
+
+    def read_input_file(self, file_name):
+        """Reads an existing CP2K input file and creates the corresponding
+        object tree from it"""
+
+        # Open the file
+        with open(self.file_name, 'r') as input_file:
+            pass
+
+    def run(self):
+        """Runs the input script."""
+        self.write_input_file()
+        command_list = []
+
+        # MPI command and flags
+        if self.mpi_on:
+            command_list.append(self.mpi_command)
+            self.mpi_flags["-n"] = self.mpi_n_processes
+            for flag, value in self.mpi_flags.iteritems():
+                command_list.append(str(flag))
+                command_list.append(str(value))
+
+        # CP2K command and flags
+        self.cp2k_flags["-o"] = self.output_path
+        self.cp2k_flags["-i"] = self.input_path
+
+        command_list.append(self.cp2k_command)
+        for flag, value in self.cp2k_flags.iteritems():
+            command_list.append(str(flag))
+            command_list.append(str(value))
+
+        call(command_list, shell=False)
 
     #def reset(self):
         #"""Clear all information from old calculation."""

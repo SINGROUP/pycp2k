@@ -243,7 +243,7 @@ def main():
     """
     """
     # First call cp2k --xml to create the xml file of the input structure
-    #call(["cp2k", "--xml"])
+    call(["cp2k", "--xml"])
 
     # Start parsing here
     tree = cElementTree.parse("cp2k_input.xml")
@@ -259,7 +259,7 @@ def main():
     recursive_class_creation(root, 0, class_dictionary, version_dictionary)
 
     # Write one modeule containing all the parsed classes.
-    with open('parsedclasses.py', 'w') as file:
+    with open('cp2kase/parsedclasses.py', 'w') as file:
         file.write(module_header)
         for class_name, class_body in class_dictionary.iteritems():
             class_body_header = (
@@ -269,16 +269,11 @@ def main():
             file.write(class_body)
 
     # Write an __all__ variable in __init__.py containing all the classes
-    with open('__init__.py', 'w') as file:
-        file.write("#! /usr/bin/env python\n\n")
-        allvar = "__all__ = ["
-        for class_name in class_dictionary.iterkeys():
-            allvar += "\"" + class_name + "\"" + ", "
-        allvar = allvar[:-2]
-        allvar += "]"
-        file.write(allvar)
-
-
-# The main function is run by default
-if __name__ == "__main__":
-    main()
+    #with open('__init__.py', 'w') as file:
+        #file.write("#! /usr/bin/env python\n\n")
+        #allvar = "__all__ = ["
+        #for class_name in class_dictionary.iterkeys():
+            #allvar += "\"" + class_name + "\"" + ", "
+        #allvar = allvar[:-2]
+        #allvar += "]"
+        #file.write(allvar)
