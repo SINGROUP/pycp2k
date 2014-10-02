@@ -23,8 +23,6 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 Example
 ------------------
 
-Terminology:
-------------------
 
 Important notes:
 ------------------
