@@ -20,15 +20,14 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 ```
    sudo python setup.py install
 ```
+Example
+------------------
 
 Terminology:
 ------------------
 
-Usage:
-------------------
-Here is an example of a cp2k input file creation with cp2kase. 
-
 Important notes:
+------------------
 
 1. All section names and keywords are in uppercase to prevent clashes with python keywords (global, print, etc.)
 2. Section names 'X' that start with a numeric value have been renamed to 'NUMX'. This is because python doesn't support variable names which start with numbers
