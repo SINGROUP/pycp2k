@@ -7,12 +7,12 @@ import inputparser
 print "Parsing the cp2k input structure:"
 inputparser.main()
 
-setup(name='cp2kase',
+setup(name='pycp2k',
       version='0.1',
-      description='An ASE interface to CP2K',
-      url='https://github.com/lauri-codes/cp2kase.git',
+      description='A python interface to CP2K',
+      url='https://github.com/lauri-codes/pycp2k.git',
       author='Lauri Himanen',
-      author_email='lauri.himanen@aalto.fi',
+      author_email='lauri.himanen@gmail.com',
       license='GPL3',
-      packages=['cp2kase'],
+      packages=['pycp2k'],
       zip_safe=False)

@@ -4,7 +4,7 @@
 """This module holds all the classes parsed from xml file created with command
 cp2k --xml"""
 
-from printable import printable
+from pycp2k.printable import printable
 
 
 class vdw_potential1(printable):

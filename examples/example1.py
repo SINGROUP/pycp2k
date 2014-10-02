@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from cp2kase.cp2k import CP2K
+from pycp2k.cp2k import CP2K
 from ase import Atom, Atoms
 import os
 

@@ -252,14 +252,14 @@ def main():
         "#! /usr/bin/env python\n"
         "# -*- coding: utf-8 -*-\n\n"
         "\"\"\"This module holds all the classes parsed from xml file created with command\ncp2k --xml\"\"\"\n\n"
-        "from printable import printable\n"
+        "from pycp2k.printable import printable\n"
     )
     class_dictionary = {}
     version_dictionary = {}
     recursive_class_creation(root, 0, class_dictionary, version_dictionary)
 
     # Write one modeule containing all the parsed classes.
-    with open('cp2kase/parsedclasses.py', 'w') as file:
+    with open('pycp2k/parsedclasses.py', 'w') as file:
         file.write(module_header)
         for class_name, class_body in class_dictionary.iteritems():
             class_body_header = (
@@ -267,13 +267,3 @@ def main():
             )
             file.write(class_body_header)
             file.write(class_body)
-
-    # Write an __all__ variable in __init__.py containing all the classes
-    #with open('__init__.py', 'w') as file:
-        #file.write("#! /usr/bin/env python\n\n")
-        #allvar = "__all__ = ["
-        #for class_name in class_dictionary.iterkeys():
-            #allvar += "\"" + class_name + "\"" + ", "
-        #allvar = allvar[:-2]
-        #allvar += "]"
-        #file.write(allvar)

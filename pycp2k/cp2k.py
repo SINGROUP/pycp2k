@@ -3,7 +3,7 @@
 
 """This module defines an ASE calculator interface to CP2K."""
 
-from cp2kase.parsedclasses import CP2K_INPUT1
+from pycp2k.parsedclasses import CP2K_INPUT1
 from ase.calculators.interface import Calculator
 from subprocess import call
 
