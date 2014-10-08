@@ -38,7 +38,8 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    ```
       sudo python setup.py install
    ```
-
+   
+5. Now you can use the package in any python script on your computer.
 
 Example
 ------------------
