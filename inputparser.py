@@ -349,7 +349,7 @@ def style_message(header, message, width=80, x_pad=2, y_pad=1):
     str_message += "|\n"
     str_message += "|" + str((width-2)*"=")+"|\n"
 
-    str_message += textwrap.wrap(message)
+    str_message += textwrap.fill(message, width=80)
 
     return str_message
 

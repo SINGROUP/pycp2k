@@ -34,11 +34,12 @@ SCF = DFT.SCF
 
 #===============================================================================
 # Fill input tree
-calc.create_cell(SUBSYS, lattice)
-calc.create_coord(SUBSYS, lattice)
 GLOBAL.Run_type = "ENERGY"
 GLOBAL.Project = project_name
 GLOBAL.Print_level = "LOW"
+
+calc.create_cell(SUBSYS, lattice)
+calc.create_coord(SUBSYS, lattice)
 
 FORCE_EVAL.Method = "Quickstep"
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
@@ -65,12 +66,13 @@ KIND.Element = "Si"
 KIND.Basis_set = "DZVP-GTH-PADE"
 KIND.Potential = "GTH-PADE-q4"
 
+calc.run()
 #===============================================================================
 # Search for a good CUTOFF
 energies = []
-for cutoff in range(50, 100, 10):
+for cutoff in range(40, 90, 20):
     DFT.MGRID.Cutoff = cutoff
-    calc.set_output_path("/home/lauri/" + project_name + str(cutoff) + ".out")
+    calc.output_path = "/home/lauri/" + project_name + str(cutoff) + ".out"
     energies.append(calc.get_potential_energy())
 
 print energies
