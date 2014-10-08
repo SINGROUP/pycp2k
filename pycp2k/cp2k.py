@@ -3,9 +3,11 @@
 
 """This module defines an ASE calculator interface to CP2K."""
 
-from pycp2k.parsedclasses import CP2K_INPUT1
+from pycp2k.parsedclasses import _CP2K_INPUT1
 from ase.calculators.interface import Calculator
 from subprocess import call
+from pycp2k.utilities import print_title, print_message, print_warning
+import re
 
 
 #===============================================================================
@@ -20,13 +22,14 @@ class CP2K(Calculator):
         -Script multiple runs with python
         -Automatic syntax correctness for the input file
         -Code completion if provided by your python IDE
+        -Quick access to documentation if provided by your IDE
 
     Attributes:
 
     """
     def __init__(self, input_path=None, output_path=None):
         """Construct CP2K-calculator object."""
-        self.CP2K_INPUT = CP2K_INPUT1()
+        self.CP2K_INPUT = _CP2K_INPUT1()
         self.input_path = input_path
         self.output_path = output_path
         self.cp2k_command = "cp2k"
@@ -35,19 +38,22 @@ class CP2K(Calculator):
         self.mpi_flags = {}
         self.mpi_n_processes = None
         self.mpi_command = "mpirun"
+        self.old_input = None
+        self.new_input = None
+        self.output = None
 
     def __del__(self):
         """Destructor"""
 
     def set_input_path(self, input_path):
-        """Set the path where all the input an."""
+        """Set the path where the input is located."""
         self.input_path = input_path
 
     def set_output_path(self, output_path):
-        """Set the path where all the input an."""
+        """Set the path where all the output is stored."""
         self.output_path = output_path
 
-    def calculation_required(atoms, quantities):
+    def calculation_required(self, atoms=None, quantities=None):
         """Check if a calculation is required.
 
         Check if the quantities in the quantities list have already been calculated
@@ -59,47 +65,67 @@ class CP2K(Calculator):
         unknown/unsupported quantities by returning True, indicating that the
         quantity is not available.
         """
+        return self.new_input != self.old_input
 
-    def get_forces(atoms):
+    def get_forces(self, atoms):
         """Return the forces."""
 
-    def get_potential_energy(atoms=None, force_consistent=False):
+    def get_potential_energy(self, atoms=None, force_consistent=False):
         """Return total energy.
 
         Both the energy extrapolated to zero Kelvin and the energy consistent with
         the forces (the free energy) can be returned.
         """
+        self.write_input_file()
+        if self.calculation_required():
+            self.run(create_input=False)
 
-    def get_stress(atoms):
+        energy = re.findall(r"ENERGY\|.*:\s*([-+]?\d*\.\d+|\d+)", self.output)
+        if len(energy) != 0:
+            if len(energy) > 1:
+                print print_warning("More than one ENERGY entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
+            return float(energy[len(energy)-1])
+        else:
+            raise Exception("ENERGY entry was not found in the CP2K output file. Please make sure that you have the correct GLOBAL.Run_type")
+
+    def get_stress(self, atoms):
         """Return the stress."""
 
-    def create_subsys_from_atoms(self, subsys, atoms):
-        """Create a CELL entry from the Atoms object.
+    def create_cell(self, subsys, atoms):
+        """Creates the cell for a SUBSYS from an ASE Atoms object.
+
+        args:
+            subsys: The SUBSYS for which the cell are created.
+            atoms: The ASE Atoms object from which the cell is extracted.
         """
-        for atom in atoms:
-            subsys.COORD.add_DEFAULT_KEYWORD(atom.symbol + " " + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]))
         cell = atoms.get_cell()
         A = cell[0, :]
         B = cell[1, :]
         C = cell[2, :]
-        subsys.CELL._A = " " + str(A[0]) + " " + str(A[1]) + " " + str(A[2])
-        subsys.CELL._B = " " + str(B[0]) + " " + str(B[1]) + " " + str(B[2])
-        subsys.CELL._C = " " + str(C[0]) + " " + str(C[1]) + " " + str(C[2])
+        subsys.CELL.A = " " + str(A[0]) + " " + str(A[1]) + " " + str(A[2])
+        subsys.CELL.B = " " + str(B[0]) + " " + str(B[1]) + " " + str(B[2])
+        subsys.CELL.C = " " + str(C[0]) + " " + str(C[1]) + " " + str(C[2])
+
+    def create_coord(self, subsys, atoms):
+        """Creates the atomic coordinates for a SUBSYS from an ASE Atoms object.
+
+        args:
+            subsys: The SUBSYS for which the coordinates are created.
+            atoms: The ASE Atoms object from which the coordinates are extracted.
+        """
+        for atom in atoms:
+            subsys.COORD.add_Default_keyword(atom.symbol + " " + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]))
 
     def write_input_file(self):
         """Creates an input file for CP2K executable from the object tree
         defined in CP2K_INPUT
         """
-        cp2k_input = self.CP2K_INPUT.print_input(-1)
-
-        # Use one of the aliases for project name
-        project_name = self.CP2K_INPUT.GLOBAL._PROJECT
-        if project_name is None:
-            project_name = self.CP2K_INPUT.GLOBAL._PROJECT_NAME
+        self.old_input = self.new_input
+        self.new_input = self.CP2K_INPUT.print_input(-1)
 
         # Write the file
         with open(self.input_path, 'w') as input_file:
-            input_file.write(cp2k_input)
+            input_file.write(self.new_input)
 
     def read_input_file(self, file_name):
         """Reads an existing CP2K input file and creates the corresponding
@@ -109,9 +135,11 @@ class CP2K(Calculator):
         with open(self.file_name, 'r') as input_file:
             pass
 
-    def run(self):
+    def run(self, print_input=False, print_output=False, create_input=True):
         """Runs the input script."""
-        self.write_input_file()
+        if create_input:
+            self.write_input_file()
+
         command_list = []
 
         # MPI command and flags
@@ -131,217 +159,19 @@ class CP2K(Calculator):
             command_list.append(str(flag))
             command_list.append(str(value))
 
+        print print_title("CP2K START")
+        print print_message("Calculation started with command " + " ".join(command_list))
+        if print_input:
+            print print_title("CP2K INPUT")
+            print self.input
         call(command_list, shell=False)
 
-    #def reset(self):
-        #"""Clear all information from old calculation."""
-        #Calculator.reset(self)
-        #self._release_force_env()
+        # Open the output file
+        with open(self.output_path, 'r') as output_file:
+            self.output = output_file.read()
 
-    #def set(self, **kwargs):
-        #"""Set parameters like set(key1=value1, key2=value2, ...)."""
-        #changed_parameters = Calculator.set(self, **kwargs)
-        #if changed_parameters:
-            #self.reset()
+        if print_output:
+            print print_title("CP2K OUTPUT")
+            print self.output
 
-    #def write(self, label):
-        #"""Write atoms, parameters and calculated properties into restart files."""
-        #self.atoms.write(label + '_restart.traj')
-        #self.parameters.write(label + '_params.ase')
-        #open(label+'_results.ase', "w").write(repr(self.results))
-
-    #def read(self, label):
-        #"""Read atoms, parameters and calculated properties from restart files."""
-        #from numpy import array
-        #self.atoms = ase.io.read(label+'_restart.traj')
-        #self.parameters = Parameters.read(label + '_params.ase')
-        #self.results = eval(open(label+'_results.ase').read())
-
-    #def calculate(self, atoms=None, properties=['energy'], system_changes=all_changes):
-        #"""Do the calculation."""
-
-        #Calculator.calculate(self, atoms, properties, system_changes)
-
-        #if("numbers" in system_changes or "initial_magmoms" in system_changes):
-            #self._release_force_env()
-
-        #if(self._force_env_id is None):
-            #self._create_force_env()
-
-        #n_atoms = len(self.atoms)
-        #if("cell" in system_changes):
-            #cell = self.atoms.get_cell()
-            #self._send("SET_CELL %d"%self._force_env_id)
-            #self._send(" ".join(["%.10f"%x for x in cell.flat]))
-            #assert(self._recv() == "* READY")
-
-        #if("positions" in system_changes):
-            #self._send("SET_POS %d"%self._force_env_id)
-            #self._send("%d"%(3*n_atoms))
-            #for pos in self.atoms.get_positions():
-                #self._send("%.10f   %.10f   %.10f"%(pos[0], pos[1], pos[2]))
-            #self._send("*END")
-            #assert(float(self._recv()) >= 0) # max change -> ignore
-            #assert(self._recv() == "* READY")
-
-        #self._send("EVAL_EF %d"%self._force_env_id)
-        #assert(self._recv() == "* READY")
-
-        #self._send("GET_E %d"%self._force_env_id)
-        #self.results['energy'] = float(self._recv()) * Hartree
-        #assert(self._recv() == "* READY")
-
-        #forces = np.zeros(shape=(n_atoms,3) )
-        #self._send("GET_F %d"%self._force_env_id)
-        #assert(int(self._recv()) == 3*n_atoms)
-        #for i in range(n_atoms):
-            #line = self._recv()
-            #forces[i,:] = [float(x) for x in line.split()]
-        #assert(self._recv() == "* END")
-        #assert(self._recv() == "* READY")
-        #self.results['forces'] = forces * Hartree / Bohr
-
-        #self._send("GET_STRESS %d"%self._force_env_id)
-        #line = self._recv()
-        #assert(self._recv() == "* READY")
-
-        #stress = np.array([float(x) for x in line.split()]).reshape(3, 3)
-        #assert(np.all(stress == np.transpose(stress)))  # should be symmetric
-        ## Convert 3x3 stress tensor to Voigt form as required by ASE
-        #stress = np.array([stress[0, 0], stress[1, 1], stress[2, 2],
-                           #stress[1, 2], stress[0, 2], stress[0, 1]])
-        #self.results['stress'] = stress * Hartree / Bohr**3
-
-        #self.write(self.label)  # TODO: this should not be called so often
-
-    #def _create_force_env(self):
-        #assert(self._force_env_id is None)
-        #inp = self._generate_input()
-
-        #if(self._debug):
-            #print inp
-        #fd, inp_fn = mkstemp(suffix=".inp")
-        #f = os.fdopen(fd, "w")
-        #f.write(inp)
-        #f.close()
-
-        #label_dir = path.dirname(self.label)
-        #if(len(label_dir)>0 and not path.exists(label_dir)):
-            #print "Creating directory: "+label_dir
-            #os.makedirs(label_dir)  # cp2k expects dirs to exist
-        #out_fn = self.parameters.txt
-        #if(out_fn == "-"):
-            #out_fn = "__STD_OUT__"
-        #self._send("LOAD %s %s"%(inp_fn, out_fn))
-        #self._force_env_id = int(self._recv())
-        #assert(self._force_env_id > 0)
-        #assert(self._recv() == "* READY")
-        #os.remove(inp_fn)
-
-    #def _release_force_env(self):
-        #if(self._force_env_id):
-            #self._send("DESTROY %d"%self._force_env_id)
-            #assert(self._recv() == "* READY")
-            #self._force_env_id = None
-
-    #def _generate_input(self):
-        #p = self.parameters
-
-        #output = "!!!! Generated by ASE !!!!\n"
-        #output += "&GLOBAL\n"
-        #output += "PROJECT %s\n"%self.label
-        #output += "&END GLOBAL\n"
-
-        #output += "&FORCE_EVAL\n"
-        #output += "&PRINT\n"
-        #output += "  &STRESS_TENSOR ON\n"
-        #output += "  &END STRESS_TENSOR\n"
-        #output += "&END PRINT\n"
-
-        #output += "METHOD Quickstep\n"
-        #output += "STRESS_TENSOR ANALYTICAL\n"
-
-        #output += "&SUBSYS\n"
-
-        ## determine pseudo-potential
-        #potential = p.pseudo_potential
-        #if(p.pseudo_potential.lower() == "auto"):
-            #if(p.xc.upper() == "LDA"):
-                #potential = "GTH-PADE"
-            #elif(p.xc.upper() in ("PADE", "BP", "BLYP", "PBE",)):
-                #potential = "GTH-"+p.xc.upper()
-            #else:
-                #warn("No matching pseudo potential found, falling back to GTH-PBE", RuntimeWarning)
-                #potential = "GTH-PBE" # fall back
-
-        ## write atomic kinds
-        #valence_electrons = self._parse_basis_set()
-        #for elem in set(self.atoms.get_chemical_symbols()):
-            #output += "&KIND %s\n"%elem
-            #output += "  BASIS_SET %s\n"%p.basis_set
-            #q = valence_electrons[(elem, p.basis_set)]
-            #output += "  POTENTIAL %s-q%d\n"%(potential, q)
-            #output += "&END KIND\n"
-
-        ## write coords
-        #output += "&COORD\n"
-        #n_electrons = 0
-        #for elem, pos in zip(self.atoms.get_chemical_symbols(), self.atoms.get_positions()):
-            #n_electrons += valence_electrons[(elem, p.basis_set)]
-            #output += "  %s  %.10f   %.10f   %.10f\n"%(elem, pos[0], pos[1], pos[2])
-        #output += "&END COORD\n"
-
-        ## write cell
-        #output += "&CELL\n"
-        #pbc = "".join([a for a,b in zip("XYZ",self.atoms.get_pbc()) if b])
-        #if(len(pbc)==0): pbc = "NONE"
-        #output += "  PERIODIC %s\n"%pbc
-        #cell = self.atoms.get_cell()
-        #output += "  A  %.10f   %.10f   %.10f\n"%(cell[0,0], cell[0,1], cell[0,2])
-        #output += "  B  %.10f   %.10f   %.10f\n"%(cell[1,0], cell[1,1], cell[1,2])
-        #output += "  C  %.10f   %.10f   %.10f\n"%(cell[2,0], cell[2,1], cell[2,2])
-        #output += "&END CELL\n"
-        #output += "&END SUBSYS\n"
-
-        ## write DFT-section
-        #output += "&DFT\n"
-        #output += "BASIS_SET_FILE_NAME %s\n"%p.basis_set_file
-        #output += "POTENTIAL_FILE_NAME %s\n"%p.potential_file
-        ##if(any(atoms.get_initial_magnetic_moments()!=0)):
-        #if(n_electrons%2 != 0): #TODO is this the proper way?
-            #output += "SPIN_POLARIZED .TRUE.\n"
-        #if(p.charge != 0):
-            #output += "CHARGE %d\n"%p.charge
-
-        #output += "&XC\n"
-        #output += "  &XC_FUNCTIONAL %s\n"%p.xc
-        #output += "  &END XC_FUNCTIONAL\n"
-        #output += "&END XC\n"
-
-        #output += "&MGRID\n"
-        #output += "  CUTOFF [eV] %.3f\n"%p.cutoff
-        #output += "&END MGRID\n"
-
-        #output += "&SCF\n"
-        #output += "  MAX_SCF %d\n"%p.max_scf
-        #output += "&END SCF\n"
-
-        #output += "&END DFT\n"
-        #output += "&END FORCE_EVAL\n"
-
-        #return(output)
-
-    #def _send(self, line):
-        #"""Send a line to the cp2k_shell"""
-        #assert(self._child.poll() is None)  # child process still alive?
-        #if(self._debug):
-            #print("Sending: "+line)
-        #self._child.stdin.write(line+"\n")
-
-    #def _recv(self):
-        #"""Receive a line from the cp2k_shell"""
-        #assert(self._child.poll() is None)  # child process still alive?
-        #line = self._pipe.readline().strip()
-        #if(self._debug):
-            #print("Received: "+line)
-        #return(line)
+        print print_title("CP2K END")
