@@ -32,7 +32,7 @@ class CP2K(Calculator):
         self.CP2K_INPUT = _CP2K_INPUT1()
         self.input_path = input_path
         self.output_path = output_path
-        self.cp2k_command = "cp2k"
+        self.cp2k_command = "cp2k.popt"
         self.cp2k_flags = {}
         self.mpi_on = True
         self.mpi_flags = {}

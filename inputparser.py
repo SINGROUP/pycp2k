@@ -359,8 +359,8 @@ def main():
     """Parses the classes and saves them to the package directory as
     parsedclasses.py.
     """
-    # First call cp2k --xml to create the xml file of the input structure
-    cp2k_command = "cp2k"
+    # First call cp2k.popt --xml to create the xml file of the input structure
+    cp2k_command = "cp2k.popt"
     try:
         call([cp2k_command, "--xml"])
     except OSError:
