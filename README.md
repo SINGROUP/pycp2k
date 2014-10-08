@@ -25,7 +25,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
       git clone https://github.com/lauri-codes/pycp2k.git
    ```
 
-3. The correct input structure for your cp2k executable is automatically created upon setup. Please make sure that you have cp2k installed, and callable from terminal with the name cp2k. **If you install a new version of cp2k** at some point, you must repeat this installation procedure for cp2kase to work properly.
+3. The correct input structure for your cp2k executable is automatically created upon setup. Please make sure that you have cp2k installed, and callable from terminal with the name cp2k. **If you install a new version of cp2k** at some point, you must repeat this installation procedure for pycp2k to work properly.
 4. Install the package by running the setup script in terminal:
    For local setup use:
 
