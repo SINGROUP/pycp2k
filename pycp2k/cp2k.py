@@ -145,7 +145,8 @@ class CP2K(Calculator):
         # MPI command and flags
         if self.mpi_on:
             command_list.append(self.mpi_command)
-            self.mpi_flags["-n"] = self.mpi_n_processes
+            if self.mpi_n_processes is not None:
+                self.mpi_flags["-n"] = self.mpi_n_processes
             for flag, value in self.mpi_flags.iteritems():
                 command_list.append(str(flag))
                 command_list.append(str(value))
