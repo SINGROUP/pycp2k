@@ -1,3 +1,5 @@
 # ignore python bytecode,
 *.pyc
+*.wfn
+*.wfn.bak-1
 # ignore the xml file created by cp2k

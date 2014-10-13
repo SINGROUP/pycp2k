@@ -1,0 +1,8 @@
+#!/bin/sh
+#SBATCH -N 1
+#SBATCH -n 5
+#SBATCH --time=10:00
+#SBATCH --mem-per-cpu=500
+#SBATCH --constraint=[xeonib]
+module load cp2k python numpy ase/3.6.0rev2515
+srun --mpi=openmpi python example_si_triton.py -n 5
