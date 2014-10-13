@@ -83,7 +83,7 @@ class CP2K(Calculator):
         energy = re.findall(r"ENERGY\|.*:\s*([-+]?\d*\.\d+|\d+)", self.output)
         if len(energy) != 0:
             if len(energy) > 1:
-                print print_warning("More than one ENERGY entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
+                print_warning("More than one ENERGY entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
             return float(energy[len(energy)-1])
         else:
             raise Exception("ENERGY entry was not found in the CP2K output file. Please make sure that you have the correct GLOBAL.Run_type")
@@ -159,10 +159,9 @@ class CP2K(Calculator):
             command_list.append(str(flag))
             command_list.append(str(value))
 
-        print print_title("CP2K START")
-        print print_message("Calculation started with command " + " ".join(command_list))
+        print_message("CP2K START", "Calculation started with command " + " ".join(command_list))
         if print_input:
-            print print_title("CP2K INPUT")
+            print_title("CP2K INPUT")
             print self.input
         call(command_list, shell=False)
 
@@ -171,7 +170,5 @@ class CP2K(Calculator):
             self.output = output_file.read()
 
         if print_output:
-            print print_title("CP2K OUTPUT")
+            print_title("CP2K OUTPUT")
             print self.output
-
-        print print_title("CP2K END")
