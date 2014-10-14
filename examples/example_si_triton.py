@@ -7,16 +7,12 @@ scientific computing at Aalto University)
 
 from pycp2k.cp2k import CP2K
 from ase.lattice.cubic import Diamond
-#import argparse
+import time
 
 #===============================================================================
-# The number of processes for MPI can be given in python as an argument when
-# running this file. This is an example of how the arguments can be extracted
-# in python.
-#parser = argparse.ArgumentParser()
-#parser.add_argument('-n', type=int, help='the number of MPI processes')
+# This is an example of how command line arguments can be extracted in python.
 calc = CP2K()
-calc.mpi_command = "srun --mpi=openmpi"
+calc.mpi_n_processes = 12
 script_path = "/triton/becs/work/himanel1/masters/results"
 project_name = "Si_bulk"
 calc.input_path = script_path + "/" + project_name + ".inp"
@@ -27,7 +23,7 @@ calc.output_path = script_path + "/" + project_name + ".out"
 lattice = Diamond(directions=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
                   symbol='Si',
                   latticeconstant=5.430697500,
-                  size=(1, 1, 1))
+                  size=(2, 2, 2))
 
 #===============================================================================
 # Shortcuts
@@ -75,4 +71,7 @@ KIND.Potential = "GTH-PADE-q4"
 
 #===============================================================================
 # Calculations
+start = time.time()
 print calc.get_potential_energy()
+end = time.time()
+print "Elapsed time: " + str(end-start)

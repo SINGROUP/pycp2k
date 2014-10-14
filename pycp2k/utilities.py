@@ -19,15 +19,15 @@ def make_title(title, width=80):
 
 
 #===============================================================================
-def make_message(message, width=80):
+def make_message(message, width=80, spaces=0):
     """Styles a message to be printed into console.
     """
     wrapper = textwrap.TextWrapper(width=width-6)
     lines = wrapper.wrap(message)
     styled_message = ""
     for line in lines:
-        styled_message += "|  " + line + (width-6-len(line))*" " + "  |\n"
-    styled_message += "|" + (width-2)*"-" + "|"
+        styled_message += spaces*" " + "|  " + line + (width-6-len(line))*" " + "  |\n"
+    styled_message += spaces*" " + "|" + (width-2)*"-" + "|"
     return styled_message
 
 
@@ -49,4 +49,4 @@ def print_message(title, message, width=80):
 def print_warning(message, width=80):
     """Returns a styled warning message to be printed into console.
     """
-    print make_title("WARNING") + "\n" + make_message(message) + "\n"
+    print "        " + make_title("WARNING", width=64) + "\n" + make_message(message, width=64, spaces=8) + "\n"
