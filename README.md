@@ -11,7 +11,7 @@ pycp2k is able to use the ASE library for creating structures and loading [many 
 
 Technically the interfacing to cp2k happens simply by writing CP2K input files and reading the output files. There is no direct interface to the fortran code (i.e. F2PY not used).
 
-Basic Installation:
+Desktop Installation:
 ------------------
 
 These installation instructions were tested on Ubuntu 14.04 x64:
