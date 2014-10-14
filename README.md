@@ -48,21 +48,40 @@ Installation and usage on Triton (Aalto University's computing cluster):
        ```
        module load cp2k python
        ```
-   2. Clone this repository to your work directory.
+       
+   2. Clone this repository to somewhere in your work directory:
    
       ```
       git clone https://github.com/lauri-codes/pycp2k.git
       ```
       
-   3. Run the inputparser script with:
+   3. Install the package locally:
    
       ```
-      python inputparser.py
+      python setup.py install --user
       ```
-   
-   4. You can directly access the package when you save and run your python scripts in the folder where the package contents are. In this case you need to run the scripts in the pycp2k folder, where the pycp2k module is.
 
-2. Usage:
+2. Usage (MPI parallel run on Triton):
+   1. Write the python script for your simulation.
+   2. Make sure that you have the files for potentials and basis sets available.
+   2. Run the python script with a batch file. The batch file could look something like this:
+   
+      ```
+      #!/bin/sh
+      #SBATCH -n 12
+      #SBATCH -N 1
+      #SBATCH --time=10:00
+      #SBATCH --mem-per-cpu=500
+
+      module load cp2k python numpy ase/3.6.0rev2515
+      export PYTHONPATH=$PYTHONPATH:/full/path/to/pycp2k/package
+      python example_si_triton.py
+      ```
+      
+NOTE: In each batch file you will have to tell the program where the pycp2k package is located with the export command. Set this path to point to the git repository which you cloned in installation step 2.
+      
+NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
+   
 
 
 Example
