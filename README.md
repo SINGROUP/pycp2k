@@ -40,23 +40,30 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    ```
    Or if you can't for some reason install the package normally, you can manually run the inputparser.py script and  write all your scripts inside the package directory.
 
-Installation on Triton:
+Installation and usage on Triton (Aalto University's computing cluster):
 ------------------
-1. Load the needed modules:
-
-    ```
-    module load cp2k python ase numpy
-    ```
-2. Clone this repository to your work directory:
-
-   ```
+1. Installation:
+   1. Load the modules required for installation:
+   
+       ```
+       module load cp2k python
+       ```
+   2. Clone this repository to your work directory.
+   
+      ```
       git clone https://github.com/lauri-codes/pycp2k.git
-   ```
-4. Install the package locally:
+      ```
+      
+   3. Run the inputparser script with:
+   
+      ```
+      python inputparser.py
+      ```
+   
+   4. You can directly access the package when you save and run your python scripts in the folder where the package contents are. In this case you need to run the scripts in the pycp2k folder, where the pycp2k module is.
 
-   ```
-      python setup.py install --user
-   ```
+2. Usage:
+
 
 Example
 ------------------
