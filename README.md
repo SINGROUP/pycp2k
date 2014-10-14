@@ -1,13 +1,13 @@
-pycp2k
+PYCP2K
 ==================
 
 A python package that provides a python interface to CP2K, an atomistic and molecular simulation software.
 
-pycp2k allows the user to create and run entire CP2K simulation with python scripts only. The simulation parameters can be dynamically created and altered thanks to an *object tree* that replaces the traditional CP2K input scripts.
+PYCP2K allows the user to create and run entire CP2K simulation with python scripts only. The simulation parameters can be dynamically created and altered thanks to an *object tree* that replaces the traditional CP2K input scripts.
 
-pycp2k is able to use the ASE library for creating structures and loading [many different atomic structure files](https://wiki.fysik.dtu.dk/ase/ase/io.html). pycp2k also is an ASE compatible atomic structure calculator. If you are not familiar with ASE, do not despair: you can yourself decide how much you want to utilize the functionality provided by ASE.
+PYCP2K is able to use the ASE library for creating structures and loading [many different atomic structure files](https://wiki.fysik.dtu.dk/ase/ase/io.html). PYCP2K also is an ASE compatible atomic structure calculator. If you are not familiar with ASE, do not despair: you can yourself decide how much you want to utilize the functionality provided by ASE.
 
-Technically the interfacing to cp2k happens simply by writing CP2K input files and reading the output files. There is no direct interface to the fortran code (i.e. F2PY not used).
+Technically the interfacing to CP2K happens simply by writing CP2K input files and reading the output files. There is no direct interface to the fortran code (i.e. F2PY not used).
 
 Desktop Installation:
 ------------------
@@ -23,7 +23,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
       git clone https://github.com/lauri-codes/pycp2k.git
    ```
 
-3. The correct input structure for your cp2k executable is automatically created upon setup. Please make sure that you have cp2k installed, and callable from terminal with the name cp2k. **If you install a new version of cp2k** at some point, you must repeat this installation procedure for pycp2k to work properly.
+3. The correct input structure for your CP2K executable is automatically created upon setup. Please make sure that you have CP2K installed, and callable from terminal with the name CP2K. **If you install a new version of CP2K** at some point, you must repeat this installation procedure for PYCP2K to work properly.
 4. Install the package by running the setup script in terminal:
    For local setup use:
 
@@ -79,7 +79,7 @@ These instructions were made for and tested on Triton, but they should be extens
       python example_si_triton.py
       ```
       
-      NOTE: In each batch file you will have to tell the program where the pycp2k package is located with the export command. Set this path to point to the git repository which you cloned in installation step ii.
+      NOTE: In each batch file you will have to tell the program where the PYCP2K package is located with the export command. Set this path to point to the git repository which you cloned in installation step ii.
       
       NOTE: At the moment you will have to load an older ASE 3.6 module. The default ASE 3.8 module is not working on Triton atm.
       
