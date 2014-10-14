@@ -20,7 +20,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 2. Pull this repository to any location on your computer:
 
    ```
-      git clone https://github.com/lauri-codes/pycp2k.git
+      git clone https://github.com/lauri-codes/PYCP2K.git
    ```
 
 3. The correct input structure for your CP2K executable is automatically created upon setup. Please make sure that you have CP2K installed, and callable from terminal with the name CP2K. **If you install a new version of CP2K** at some point, you must repeat this installation procedure for PYCP2K to work properly.
@@ -53,7 +53,7 @@ These instructions were made for and tested on Triton, but they should be extens
    2. Clone this repository to somewhere in your work directory:
    
       ```
-      git clone https://github.com/lauri-codes/pycp2k.git
+      git clone https://github.com/lauri-codes/PYCP2K.git
       ```
       
    3. Install the package locally:
