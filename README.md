@@ -42,6 +42,9 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 
 Installation and usage on Triton (Aalto University's computing cluster):
 ------------------
+
+These instructions were made and tested on Triton, but they should be extensible to any other computer cluster with the appropriate changes.
+
 1. Installation:
    1. Load the modules required for installation:
    
