@@ -1,8 +1,6 @@
 pycp2k
 ==================
 
-**WORK IN PROGRESS!**
-
 A python package that provides a python interface to CP2K, an atomistic and molecular simulation software.
 
 pycp2k allows the user to create and run entire CP2K simulation with python scripts only. The simulation parameters can be dynamically created and altered thanks to an *object tree* that replaces the traditional CP2K input scripts.
