@@ -81,6 +81,8 @@ These instructions were made for and tested on Triton, but they should be extens
       
       NOTE: In each batch file you will have to tell the program where the pycp2k package is located with the export command. Set this path to point to the git repository which you cloned in installation step ii.
       
+      NOTE: At the moment you will have to load an older ASE 3.6 module. The default ASE 3.8 module is not working on Triton atm.
+      
       NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
 
 Example Script
