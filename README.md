@@ -63,8 +63,8 @@ These instructions were made for and tested on Triton, but they should be extens
       ```
 
 2. Usage (MPI parallel run on Triton):
-   1. Write the python script for your simulation.
-   2. Make sure that you have the files for potentials and basis sets available.
+   1. Write the python script for your simulation. See the examples folder for inspiration.
+   2. Make sure that you have the files for potentials and basis sets available. For testing you can e.g. use the files *GTH\_POTENTIALS* and *BASIS\_SET* found in the examples folder.
    2. Run the python script with a batch file. The batch file could look something like this:
    
       ```sh
