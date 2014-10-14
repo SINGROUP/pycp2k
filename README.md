@@ -38,7 +38,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    ```
       sudo python setup.py install
    ```
-   Or if you can't for some reason install the package normally, you can manually run the inputparser.py script and  write all your scripts inside the package directory.
+
 
 Installation and usage on Triton (Aalto University's computing cluster):
 ------------------
