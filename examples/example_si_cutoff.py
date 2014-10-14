@@ -66,7 +66,6 @@ KIND.Element = "Si"
 KIND.Basis_set = "DZVP-GTH-PADE"
 KIND.Potential = "GTH-PADE-q4"
 
-calc.run()
 #===============================================================================
 # Search for a good CUTOFF
 energies = []
