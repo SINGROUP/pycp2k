@@ -84,6 +84,8 @@ These instructions were made for and tested on Triton, but they should be extens
       NOTE: At the moment you will have to load an older ASE 3.6 module. The default ASE 3.8 module is not working on Triton atm.
       
       NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
+      
+      NOTE: *srun* is not used for running the python code. This is because *srun* makes the python code run on all allocated cores, whereas we want it to run only on one core. *srun* is also not used to run cp2k, but it is run with *mpirun* instead. This is because the python code cannot spawn a *srun* subprocess.
 
 Example Script
 ------------------
