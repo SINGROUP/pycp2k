@@ -69,7 +69,7 @@ These instructions were made for and tested on Triton, but they should be extens
    2. Make sure that you have the files for potentials and basis sets available.
    2. Run the python script with a batch file. The batch file could look something like this:
    
-      ```
+      ```sh
       #!/bin/sh
       #SBATCH -n 12
       #SBATCH -N 1
@@ -81,11 +81,9 @@ These instructions were made for and tested on Triton, but they should be extens
       python example_si_triton.py
       ```
       
-   NOTE: In each batch file you will have to tell the program where the pycp2k package is located with the export command. Set this path to point to the git repository which you cloned in installation step ii.
+      NOTE: In each batch file you will have to tell the program where the pycp2k package is located with the export command. Set this path to point to the git repository which you cloned in installation step ii.
       
-   NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
-   
-
+      NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
 
 Example Script
 ------------------
