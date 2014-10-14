@@ -78,13 +78,13 @@ Installation and usage on Triton (Aalto University's computing cluster):
       python example_si_triton.py
       ```
       
-NOTE: In each batch file you will have to tell the program where the pycp2k package is located with the export command. Set this path to point to the git repository which you cloned in installation step 2.
+   NOTE: In each batch file you will have to tell the program where the pycp2k package is located with the export command. Set this path to point to the git repository which you cloned in installation step ii.
       
-NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
+   NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
    
 
 
-Example
+Example Script
 ------------------
 ```python
 #! /usr/bin/env python
