@@ -4,3 +4,5 @@
 *.wfn.bak-1
 *~
 *.xml
+pycp2k/parsedclasses.py
+pycp2k/parsedclasses.pyc
