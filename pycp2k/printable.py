@@ -40,8 +40,7 @@ class printable(object):
         # Repeatable keywords
         for attname, realname in self._repeated_keywords:
             for keyword in self.__dict__["list_" + attname]:
-                if keyword.value is not None:
-                    inp += (level + 1) * "  " + realname + " " + str(keyword.value) + "\n"
+                inp += (level + 1) * "  " + realname + " " + str(keyword) + "\n"
 
         # Non-repeatable subsections
         for attname, realname in self._subsections:

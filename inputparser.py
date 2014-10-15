@@ -70,8 +70,10 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     """
     default_keywords = []
     repeated_default_keywords = []
+    repeated_default_keyword_docs = []
     keywords = []
     repeated_keywords = []
+    repeated_keyword_docs = []
     subsections = []
     repeated_subsections = []
     repeatable_aliases = []
@@ -159,6 +161,28 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                 name = keyname.text
                 newname = validify_keyword(name)
 
+                # Write the description for the keyword
+                description = keyword.find("DESCRIPTION").text
+                desc_text = "        \"\"\"\n"
+                if description is not None:
+                    for line in textwrap.wrap(description):
+                        desc_text += "        " + line + "\n"
+                else:
+                    desc_text += "\n"
+
+                # If the values are enumerated, document the possible values
+                data_type = keyword.find("DATA_TYPE")
+                if data_type.get("kind") == "keyword":
+                    desc_text += "\n        Available values:\n"
+                    enumerations = data_type.find("ENUMERATION")
+                    for enum in enumerations.findall("ITEM"):
+                        desc_text += "            " + enum.find("NAME").text + "\n"
+                        enum_description = enum.find("DESCRIPTION").text
+                        if enum_description is not None:
+                            for line in textwrap.wrap(enum_description):
+                                desc_text += "                " + line + "\n"
+                desc_text += "        \"\"\"\n"
+
                 # Create original attribute for the default keyname
                 if newname == default_name:
 
@@ -166,30 +190,10 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                     if keyword.get("repeats") == "yes":
                         public += "        self.list_" + newname + " = []\n"
                         repeated_keywords.append((newname, name))
+                        repeated_keyword_docs.append(desc_text)
                     else:
                         public += "        self." + newname + " = None\n"
-
-                        # Write the description for the keyword
-                        description = keyword.find("DESCRIPTION").text
-                        public += "        \"\"\"\n"
-                        if description is not None:
-                            for line in textwrap.wrap(description):
-                                public += "        " + line + "\n"
-                        else:
-                            public += "\n"
-
-                        # If the values are enumerated, document the possible values
-                        data_type = keyword.find("DATA_TYPE")
-                        if data_type.get("kind") == "keyword":
-                            public += "\n        Available values:\n"
-                            enumerations = data_type.find("ENUMERATION")
-                            for enum in enumerations.findall("ITEM"):
-                                public += "            " + enum.find("NAME").text + "\n"
-                                enum_description = enum.find("DESCRIPTION").text
-                                if enum_description is not None:
-                                    for line in textwrap.wrap(enum_description):
-                                        public += "                " + line + "\n"
-                        public += "        \"\"\"\n"
+                        public += desc_text
                         keywords.append((newname, name))
 
                 # Create properties for aliases
@@ -198,15 +202,15 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                         public += "        self.list_" + newname + " = self.list_" + default_name + "\n"
                         repeatable_aliases.append((newname, default_name))
                     else:
-                        properties += ("    @property\n"
+                        properties += ("\n    @property\n"
                                        "    def " + newname + "(self):\n"
                                        "        \"\"\"\n"
                                        "        See documentation for " + default_name + "\n"
                                        "        \"\"\"\n"
-                                       "        return self." + default_name + "\n\n")
-                        setters += ("    @" + newname + ".setter\n"
+                                       "        return self." + default_name + "\n")
+                        setters += ("\n    @" + newname + ".setter\n"
                                     "    def " + newname + "(self, value):\n"
-                                    "        self." + default_name + " = value\n\n")
+                                    "        self." + default_name + " = value\n")
 
     #---------------------------------------------------------------------------
     # Create a class attribute for all DEFAULT_KEYWORDS
@@ -217,35 +221,37 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
         name = default_keyword.find("NAME").text
         newname = validify_keyword(name)
 
-        if default_keyword.get("repeats") == "yes":
-            public += "        self.list_" + newname + " = []\n"
-            repeated_default_keywords.append((newname, name))
-        else:
-            public += "        self." + newname + " = None\n"
-            default_keywords.append((newname, name))
-
         # Write the description for the keyword
         description = default_keyword.find("DESCRIPTION").text
-        public += "        \"\"\"\n"
+        desc_text = "        \"\"\"\n"
         if description is not None:
             for line in textwrap.wrap(description):
-                public += "        " + line + "\n"
+                desc_text += "        " + line + "\n"
         else:
-            public += "\n"
+            desc_text += "\n"
 
         # If the values are enumerated, document the possible values
         data_type = default_keyword.find("DATA_TYPE")
         if data_type.get("kind") == "keyword":
-            public += "        AVAILABLE VALUES:\n"
+            desc_text += "        AVAILABLE VALUES:\n"
             enumerations = data_type.find("ENUMERATION")
             for enum in enumerations.findall("ITEM"):
-                public += "            " + enum.find("NAME").text + "\n"
+                desc_text += "            " + enum.find("NAME").text + "\n"
                 enum_description = enum.find("DESCRIPTION").text
                 if enum_description is not None:
                     for line in textwrap.wrap(enum_description):
-                        public += "                " + line + "\n"
+                        desc_text += "                " + line + "\n"
 
-        public += "        \"\"\"\n"
+        desc_text += "        \"\"\"\n"
+
+        if default_keyword.get("repeats") == "yes":
+            public += "        self.list_" + newname + " = []\n"
+            repeated_default_keywords.append((newname, name))
+            repeated_default_keyword_docs.append(desc_text)
+        else:
+            public += "        self." + newname + " = None\n"
+            public += desc_text
+            default_keywords.append((newname, name))
 
     #---------------------------------------------------------------------------
     # Create attribute for each subsection
@@ -276,28 +282,32 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     private += "        self._subsections = " + str(subsections) + "\n"
     private += "        self._repeated_subsections = " + str(repeated_subsections) + "\n"
 
+    #---------------------------------------------------------------------------
     # Write a function for adding repeateable sections
     for repeated in repeated_subsections:
         attribute_name = repeated[0]
         attribute_class_name = repeated[1]
-        functions += ("    def add_" + attribute_name + "(self):\n"
+        functions += ("    def " + attribute_name + "_add(self):\n"
                       "        new_section = " + attribute_class_name + "()\n"
                       "        self.list_" + attribute_name + ".append(new_section)\n"
                       "        return new_section\n\n")
 
     # Write a function for adding repeateable keywords
-    for repeated in repeated_keywords:
-        functions += ("    def add_" + repeated[0] + "(self, value):\n"
+    for i, repeated in enumerate(repeated_keywords):
+        functions += ("    def " + repeated[0] + "_add(self, value):\n" + repeated_keyword_docs[i] +
                       "        self.list_" + repeated[0] + ".append(value)\n\n")
 
     # Write a function for adding repeateable default keywords
-    for repeated in repeated_default_keywords:
-        functions += ("    def add_" + repeated[0] + "(self, value):\n"
+    for i, repeated in enumerate(repeated_default_keywords):
+        functions += ("    def " + repeated[0] + "_add(self, value):\n" + repeated_default_keyword_docs[i] +
                       "        self.list_" + repeated[0] + ".append(value)\n\n")
 
     # Write a function for adding aliased and repeateable keywords
     for alias in repeatable_aliases:
-        functions += ("    def add_" + alias[0] + "(self, value):\n"
+        functions += ("    def " + alias[0] + "_add(self, value):\n"
+                      "        \"\"\"\n"
+                      "        See documentation for function " + default_name + "_add()\n"
+                      "        \"\"\"\n"
                       "        self.list_" + repeated[1] + ".append(value)\n\n")
 
     # Write a function for printing original CP2K input files

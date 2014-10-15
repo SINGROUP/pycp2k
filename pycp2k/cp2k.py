@@ -114,7 +114,7 @@ class CP2K(Calculator):
             atoms: The ASE Atoms object from which the coordinates are extracted.
         """
         for atom in atoms:
-            subsys.COORD.add_Default_keyword(atom.symbol + " " + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]))
+            subsys.COORD.Default_keyword_add(atom.symbol + " " + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]))
 
     def write_input_file(self):
         """Creates an input file for CP2K executable from the object tree
