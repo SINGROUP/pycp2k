@@ -20,22 +20,24 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 2. Pull this repository to any location on your computer:
 
    ```
-      git clone https://github.com/lauri-codes/PYCP2K.git
+   git clone https://github.com/lauri-codes/PYCP2K.git
    ```
 
-3. The correct input structure for your CP2K executable is automatically created upon setup. Please make sure that you have CP2K installed, and callable from terminal with the name CP2K. **If you install a new version of CP2K** at some point, you must repeat this installation procedure for PYCP2K to work properly.
+3. The correct input structure is created from the .xml file that can be created by calling the CP2K executable with flag --xml). During the setup you will have the option of creating the .xml file by using a CP2K executable on your computer, or by using a pre-existing .xml file. The .xml file may be differ between CP2K versions, and if you change CP2K version at some point, you should rerun this installation. The .xml file for CP2K 2.4 is provided with this repository.
 4. Install the package by running the setup script in terminal:
    For local setup use:
 
    ```
-      python setup.py install --user
+   python setup.py install --user
    ```
    
    For system-wide setup use:
    
    ```
-      sudo python setup.py install
+   sudo python setup.py install
    ```
+   
+   The setup
 
 
 Installation and usage on Triton (Aalto University's computing cluster):
