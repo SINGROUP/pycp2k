@@ -126,7 +126,7 @@ calc.mpi_n_processes = 2
 # specify these but they will make your life easier.
 CP2K_INPUT = calc.CP2K_INPUT  # This is the root of the input tree
 GLOBAL = CP2K_INPUT.GLOBAL
-FORCE_EVAL = CP2K_INPUT.FORCE_EVAL_add()  # Repeatable items X are added with add_X() function
+FORCE_EVAL = CP2K_INPUT.FORCE_EVAL_add()  # Repeatable items X are added with X_add() function
 SUBSYS = FORCE_EVAL.SUBSYS
 DFT = FORCE_EVAL.DFT
 SCF = DFT.SCF
