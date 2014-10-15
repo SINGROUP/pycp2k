@@ -6,7 +6,7 @@ file.
 """
 
 import xml.etree.cElementTree as cElementTree
-from subprocess import call
+from pycp2k import utilities
 import textwrap
 
 
@@ -31,7 +31,7 @@ def validify_section(string):
         string = "NUM" + string
 
     if changed:
-        print "Section " + original + " replaced with " + string
+        print "    Section " + original + " replaced with " + string
     return string
 
 
@@ -56,7 +56,7 @@ def validify_keyword(string):
         string = "NUM" + string
 
     if changed:
-        print "Keyword " + original + " replaced with " + string
+        print "    Keyword " + original + " replaced with " + string
 
     string = string.capitalize()
     return string
@@ -339,46 +339,13 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
 
 
 #===============================================================================
-def style_message(header, message, width=80, x_pad=2, y_pad=1):
-    """Styles a message to be printed into console.
-
-    The message can be a list of string, where each list item corresponds to a
-    row.  If a single string is provided, it is converted to a list. Rows are
-    cut into pieces so that they will fit into the defined width.
-    """
-
-    str_message = "\n"
-    str_message += "|" + str((width-2)*"=")+"|\n"
-    str_message += "|"
-    space = width-len(header)-2
-    pre_space = space/2
-    post_space = space-pre_space
-    str_message += str((pre_space)*" ")
-    str_message += header
-    str_message += str((post_space)*" ")
-    str_message += "|\n"
-    str_message += "|" + str((width-2)*"=")+"|\n"
-
-    str_message += textwrap.fill(message, width=80)
-
-    return str_message
-
-
-#===============================================================================
-def main():
+def main(xml_path):
     """Parses the classes and saves them to the package directory as
     parsedclasses.py.
     """
-    # First call cp2k.popt --xml to create the xml file of the input structure
-    cp2k_command = "cp2k.popt"
-    try:
-        call([cp2k_command, "--xml"])
-    except OSError:
-        print style_message("ERROR", "Could not find the executable named " + cp2k_command + ". Please make sure that you have CP2K installed. Canceling installation...")
-        return False
-
     # Start parsing here
-    tree = cElementTree.parse("cp2k_input.xml")
+    utilities.print_subtitle("CREATING INPUT STRUCTURE...")
+    tree = cElementTree.parse(xml_path)
     root = tree.getroot()
     module_header = (
         "#! /usr/bin/env python\n"

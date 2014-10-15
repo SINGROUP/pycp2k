@@ -8,6 +8,7 @@ from ase.calculators.interface import Calculator
 from subprocess import call
 from pycp2k.utilities import print_title, print_message, print_warning
 import re
+import pycp2k.config
 
 
 #===============================================================================
@@ -32,7 +33,7 @@ class CP2K(Calculator):
         self.CP2K_INPUT = _CP2K_INPUT1()
         self.input_path = input_path
         self.output_path = output_path
-        self.cp2k_command = "cp2k.popt"
+        self.cp2k_command = pycp2k.config.CP2K_DEFAULT_NAME
         self.cp2k_flags = {}
         self.mpi_on = True
         self.mpi_flags = {}
