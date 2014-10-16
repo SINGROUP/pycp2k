@@ -158,9 +158,15 @@ class CP2K(Calculator):
     def create_cell(self, subsys, atoms):
         """Creates the cell for a SUBSYS from an ASE Atoms object.
 
+        Creates the cell unit vectors and replicates the periodic boundary
+        conditions. Notice that this doesn't affect the PBCs used for
+        electrostatics! (use POISSON.PERIODIC)
+
         args:
-            subsys: The SUBSYS for which the cell are created.
-            atoms: The ASE Atoms object from which the cell is extracted.
+            subsys: pycp2k.parsedclasses._subsys1
+                The SUBSYS for which the cell is created.
+            atoms: ASE Atoms
+                The ASE Atoms object from which the cell is extracted.
         """
         cell = atoms.get_cell()
         A = cell[0, :]
@@ -169,6 +175,12 @@ class CP2K(Calculator):
         subsys.CELL.A = " " + str(A[0]) + " " + str(A[1]) + " " + str(A[2])
         subsys.CELL.B = " " + str(B[0]) + " " + str(B[1]) + " " + str(B[2])
         subsys.CELL.C = " " + str(C[0]) + " " + str(C[1]) + " " + str(C[2])
+
+        pbc = atoms.get_pbc()
+        if not any(pbc):
+            subsys.CELL.Periodic = "NONE"
+        else:
+            subsys.CELL.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
 
     def create_coord(self, subsys, atoms):
         """Creates the atomic coordinates for a SUBSYS from an ASE Atoms object.
