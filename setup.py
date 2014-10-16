@@ -56,7 +56,7 @@ def main():
 
         # Ask user what to do
         print "|------------------------------------------------------------------------------|"
-        print textwrap.fill("Choose the CP2K executable:", width=80)
+        print textwrap.fill("Choose the CP2K executable used for creating the xml file:", width=80)
         for i, [name, avail] in enumerate(cp2k_commands):
             if avail:
                 print "\n    [" + str(i+1) + "] " + name
@@ -112,14 +112,13 @@ def main():
         else:
             xml_path = "cp2k_input_" + available_versions[option_number - 1] + ".xml"
 
-    # Ask user what to do
+    #---------------------------------------------------------------------------
+    # Ask for the default CP2K command
     print "|------------------------------------------------------------------------------|"
     print textwrap.fill("Choose the default CP2K executable. This executable is used by default for running CP2K. It can be changed by modifying config.py in the pycp2k folder, and can be dynamically overridden for each simulation with the 'cp2k_command' attribute.", width=80)
+    print "\n"
     for i, [name, avail] in enumerate(cp2k_commands):
-        if avail:
-            print "\n    [" + str(i+1) + "] " + name
-        else:
-            print "    [X] " + name + " not available"
+            print "    [" + str(i+1) + "] " + name
     print "    [" + str(len(cp2k_commands)+1) + "] Custom CP2K executable name\n"
     valid_number = False
     while not valid_number:
@@ -134,10 +133,36 @@ def main():
         cp2k_default_command = raw_input('Enter CP2K executable name:')
     else:
         cp2k_default_command = cp2k_commands[int(option_number-1)][0]
+
+    #---------------------------------------------------------------------------
+    # Ask for the default MPI command
+    print "|------------------------------------------------------------------------------|"
+    print textwrap.fill("Choose the default MPI executable. This executable is used by default for MPI parallel runs. It can be changed by modifying config.py in the pycp2k folder, and can be dynamically overridden for each simulation with the 'mpi_command' attribute.", width=80)
+    mpi_commands = ["mpirun"]
+    for i, name in enumerate(mpi_commands):
+        print "\n    [" + str(i+1) + "] " + name
+    print "    [" + str(len(mpi_commands)+1) + "] Custom MPI executable name\n"
+    valid_number = False
+    while not valid_number:
+        try:
+            option_number = raw_input('Enter option number:')
+            option_number = int(option_number)
+            valid_number = True
+        except ValueError:
+            print "That's not a valid integer number! Try again."
+
+    if option_number == len(mpi_commands)+1:
+        mpi_default_command = raw_input('Enter MPI executable name:')
+    else:
+        mpi_default_command = mpi_commands[int(option_number-1)]
+
+    #---------------------------------------------------------------------------
+    # Write the config file
     with open('pycp2k/config.py', 'w') as config_file:
         contents = ("#! /usr/bin/env python\n"
                     "# -*- coding: utf-8 -*-\n\n"
-                    "CP2K_DEFAULT_NAME = \"" + cp2k_default_command + "\"")
+                    "cp2k_default_command = \"" + cp2k_default_command + "\"\n"
+                    "mpi_default_command = \"" + mpi_default_command + "\"")
         config_file.write(contents)
 
     #---------------------------------------------------------------------------

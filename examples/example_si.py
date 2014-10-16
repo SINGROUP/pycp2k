@@ -83,7 +83,16 @@ KIND.Basis_set = "DZVP-GTH-PADE"
 KIND.Potential = "GTH-PADE-q4"
 
 #===============================================================================
-# Calculate and print energy. This function is part of the ASE calculator
-# interface, and should provide to be useful. You can also use the calc.run()
-# function to simply run cp2k without using these ASE specific functions.
+# After you have created your simulation you can choose how to run it.
+# Typically there are three options:
+
+# 1. Only write the input file. CP2K is then run manually or with some other
+# script.
+calc.write_input_file()
+
+# 2. Write the input file and run CP2K as a subprocess in python.
+calc.run()
+
+# 3. Write the input file, run CP2K as a subprocess and fetch results from the output file.
 print calc.get_potential_energy()
+print calc.get_forces()

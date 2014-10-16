@@ -9,6 +9,7 @@ from subprocess import call
 from pycp2k.utilities import print_title, print_message, print_warning
 import re
 import pycp2k.config
+import numpy as np
 
 
 #===============================================================================
@@ -26,19 +27,40 @@ class CP2K(Calculator):
         -Quick access to documentation if provided by your IDE
 
     Attributes:
-
+        CP2K_INPUT: pycp2k.parsedclasses._CP2K_INPUT1
+            The root of the input tree
+        input_path: string
+            Path where the input file is stored
+        output_path: string
+            Path where the output file is stored
+        cp2k_command: string
+            The command with which CP2K is called
+        cp2k_flags: dict
+            Contains any additional cp2k executable flags
+        mpi_on: bool
+            Whether MPI parallellization should be used
+        mpi_flags: dict
+            Contains any additional MPI executable flags
+        mpi_command: string
+            The name of MPI command
+        old_input: string
+            The input file for the last CP2K run
+        new_input: string
+            The input file for a new CP2K run
+        output: string
+            The output of the last CP2K run
     """
     def __init__(self, input_path=None, output_path=None):
         """Construct CP2K-calculator object."""
         self.CP2K_INPUT = _CP2K_INPUT1()
         self.input_path = input_path
         self.output_path = output_path
-        self.cp2k_command = pycp2k.config.CP2K_DEFAULT_NAME
+        self.cp2k_command = pycp2k.config.cp2k_default_command
         self.cp2k_flags = {}
         self.mpi_on = True
         self.mpi_flags = {}
         self.mpi_n_processes = None
-        self.mpi_command = "mpirun"
+        self.mpi_command = pycp2k.config.mpi_default_command
         self.old_input = None
         self.new_input = None
         self.output = None
@@ -57,37 +79,78 @@ class CP2K(Calculator):
     def calculation_required(self, atoms=None, quantities=None):
         """Check if a calculation is required.
 
-        Check if the quantities in the quantities list have already been calculated
-        for the atomic configuration atoms. The quantities can be one or more of:
-        ‘energy’, ‘forces’, ‘stress’, ‘charges’ and ‘magmoms’.
+        Available quantitites: forces, energy
 
         This method is used to check if a quantity is available without further
-        calculations. For this reason, calculators should react to
-        unknown/unsupported quantities by returning True, indicating that the
-        quantity is not available.
-        """
-        return self.new_input != self.old_input
+        calculations. For unknown/unsupported quantities this returns true,
+        indicating that the quantity is not available.
 
-    def get_forces(self, atoms):
+        Because it is very hard to know what parameters affect the calculation
+        of different quantities (energy, forces, etc.), this function simply
+        checks that has the input file changed since last evaluation.
+        """
+        available_quantities = ["energy", "forces"]
+        for quantity in quantities:
+            if quantity not in available_quantities:
+                print_warning("Quantity '" + quantity + "' not available.")
+                return True
+
+        if self.old_input is None:
+            return True
+        else:
+            new_input = self.CP2K_INPUT.print_input(-1)
+            return new_input != self.old_input
+
+    def get_forces(self, atoms=None):
         """Return the forces."""
+        #if self.calculation_required(quantities=["forces"]):
+            #self.run()
+
+        # Open the output file
+        with open(self.output_path, 'r') as output_file:
+            self.output = output_file.read()
+
+        force_matches = re.findall(r"ATOMIC FORCES in.*\n\n.*\n((?:\s{6}.*\n)*) SUM OF ATOMIC FORCES", self.output)
+        if len(force_matches) != 0:
+            if len(force_matches) > 1:
+                print_warning("More than one 'ATOMIC FORCES' entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
+        else:
+            raise Exception("'ATOMIC FORCES' entry was not found in the CP2K output file. Please make sure that you have the correct 'GLOBAL.Run_type'")
+
+        # Parse the force string
+        force_string = force_matches[-1]
+        lines = force_string.splitlines()
+        forces = np.zeros([len(lines), 3])
+        for i, line in enumerate(lines):
+            words = line.split()
+            z = float(words[-1])
+            y = float(words[-2])
+            x = float(words[-3])
+            forces[i, 0] = x
+            forces[i, 1] = y
+            forces[i, 2] = z
+
+        return forces
 
     def get_potential_energy(self, atoms=None, force_consistent=False):
         """Return total energy.
 
-        Both the energy extrapolated to zero Kelvin and the energy consistent with
-        the forces (the free energy) can be returned.
+        Only the energy extrapolated to zero Kelvin is currently supported.
         """
-        self.write_input_file()
-        if self.calculation_required():
-            self.run(create_input=False)
+        if force_consistent:
+            print_warning("Fetching the energy consistent with the forces (the free energy) is not implemented yet.")
+            return None
+
+        if self.calculation_required(quantities=["energy"]):
+            self.run()
 
         energy = re.findall(r"ENERGY\|.*:\s*([-+]?\d*\.\d+|\d+)", self.output)
         if len(energy) != 0:
             if len(energy) > 1:
-                print_warning("More than one ENERGY entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
-            return float(energy[len(energy)-1])
+                print_warning("More than one 'ENERGY' entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
+            return float(energy[-1])
         else:
-            raise Exception("ENERGY entry was not found in the CP2K output file. Please make sure that you have the correct GLOBAL.Run_type")
+            raise Exception("'ENERGY' entry was not found in the CP2K output file. Please make sure that you have the correct 'GLOBAL.Run_type'")
 
     def get_stress(self, atoms):
         """Return the stress."""
@@ -136,11 +199,10 @@ class CP2K(Calculator):
         with open(self.file_name, 'r') as input_file:
             pass
 
-    def run(self, print_input=False, print_output=False, create_input=True):
+    def run(self, print_input=False, print_output=False):
         """Runs the input script."""
-        if create_input:
-            self.write_input_file()
 
+        self.write_input_file()
         command_list = []
 
         # MPI command and flags
