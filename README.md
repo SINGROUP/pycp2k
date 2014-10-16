@@ -24,7 +24,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    ```
 
 3. The correct input structure is created from the .xml file that can be created by calling the CP2K executable with flag --xml. During the setup you will have the option of creating the .xml file by using a CP2K executable on your computer, or by using a pre-existing .xml file. The .xml files may differ between CP2K versions, and if you change CP2K version at some point, you should rerun this installation. The .xml file for CP2K 2.4 is provided with this repository.
-4. Install the package by running the setup script in terminal:
+4. Install the package by running the setup script in terminal. During setup you will be asked how you want to create the input structure (using executable or existing xml file) and what should the default CP2K and MPI commands be.
    For local setup use:
 
    ```
@@ -36,9 +36,6 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    ```
    sudo python setup.py install
    ```
-   
-   The setup
-
 
 Installation and usage on Triton (Aalto University's computing cluster):
 ------------------
@@ -177,10 +174,20 @@ KIND.Basis_set = "DZVP-GTH-PADE"
 KIND.Potential = "GTH-PADE-q4"
 
 #===============================================================================
-# Calculate and print energy. This function is part of the ASE calculator
-# interface, and should provide to be useful. You can also use the calc.run()
-# function to simply run cp2k without using these ASE specific functions.
+# After you have created your simulation you can choose how to run it.
+# Typically there are three options:
+
+# 1. Only write the input file. CP2K is then run manually or with some other
+# script.
+calc.write_input_file()
+
+# 2. Write the input file and run CP2K as a subprocess in python.
+calc.run()
+
+# 3. Write the input file, run CP2K as a subprocess and fetch results from the output file.
 print calc.get_potential_energy()
+print calc.get_forces()
+
 ```
 
 Important notes:
