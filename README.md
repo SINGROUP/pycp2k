@@ -43,10 +43,10 @@ Installation and usage on Triton (Aalto University's computing cluster):
 These instructions were made for and tested on Triton, but they should be extensible to any other computer cluster with the appropriate changes.
 
 1. Installation:
-   1. Load the modules required for installation:
+   1. Load the modules required for installation (do not load the python module for installation: the installation will not run as the loaded python version will not find setuptools):
    
        ```
-       module load cp2k python
+       module load cp2k
        ```
        
    2. Clone this repository to somewhere in your work directory:
