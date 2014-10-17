@@ -70,6 +70,7 @@ These instructions were made for and tested on Triton, but they should be extens
       #!/bin/sh
       #SBATCH -n 12
       #SBATCH -N 1
+      #SBATCH --constraint=xeon
       #SBATCH --time=10:00
       #SBATCH --mem-per-cpu=500
 
@@ -85,6 +86,8 @@ These instructions were made for and tested on Triton, but they should be extens
       NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
       
       NOTE: *srun* is not used for running the python code. This is because *srun* makes the python code run on all allocated cores, whereas we want it to run only on one core. *srun* is also not used to run cp2k, but it is run with *mpirun* instead. This is because the python code cannot spawn a *srun* subprocess.
+      
+      NOTE: The nodes are constrained to xeons for stability reason. The default version of cp2k on triton seems to only properly work on xeon nodes with the mpirun command.
 
 Example Script
 ------------------
