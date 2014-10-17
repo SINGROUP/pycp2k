@@ -172,9 +172,9 @@ class CP2K(Calculator):
         A = cell[0, :]
         B = cell[1, :]
         C = cell[2, :]
-        subsys.CELL.A = " " + str(A[0]) + " " + str(A[1]) + " " + str(A[2])
-        subsys.CELL.B = " " + str(B[0]) + " " + str(B[1]) + " " + str(B[2])
-        subsys.CELL.C = " " + str(C[0]) + " " + str(C[1]) + " " + str(C[2])
+        subsys.CELL.A = str(A[0]) + " " + str(A[1]) + " " + str(A[2])
+        subsys.CELL.B = str(B[0]) + " " + str(B[1]) + " " + str(B[2])
+        subsys.CELL.C = str(C[0]) + " " + str(C[1]) + " " + str(C[2])
 
         pbc = atoms.get_pbc()
         if not any(pbc):
@@ -191,6 +191,15 @@ class CP2K(Calculator):
         """
         for atom in atoms:
             subsys.COORD.Default_keyword_add(atom.symbol + " " + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]))
+
+    def create_constraints(self, subsys, motion, atoms):
+        """Creates the atomic coordinates for a SUBSYS from an ASE Atoms object.
+
+        args:
+            subsys: The SUBSYS from which.
+            atoms: The ASE Atoms object from which the coordinates are extracted.
+        """
+        pass
 
     def write_input_file(self):
         """Creates an input file for CP2K executable from the object tree
