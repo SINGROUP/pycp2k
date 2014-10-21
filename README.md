@@ -209,5 +209,5 @@ Important notes:
 3. Section and keyword names 'X' that start with a numeric value have been renamed to 'NUMX'. This is because python doesn't support variable names which start with numbers
 4. Section and keyword names which include the plus sign '+' have been renamed so that it is replaced with 'PLUS'. This is because python doesn't allow the plus sign within variable names.
 5. Section and keyword names which include the minus/hyphen sign '-' have been renamed so that it is replaced wih '_'. This is because python doesn't allow the minus/hyphen sign within variable names.
-6. All the repeatable items X have to be added with a function 'X\_add()'. For sections this function returns a reference to the newly created object which you should store into a new variable for later access. The list of repeateable item can be accessed from attribute 'list\_X'
+6. All the repeatable sections X have to be added with a function 'X\_add()'. This function returns a reference to the newly created object which you should store into a new variable for later access. Optionally you can provide the 'Section\_parameters' as an argument to this function. The list of the repeatable sections can be accessed from attribute 'X\_list'.
 7. You can use aliases and even use several aliases for the same item in the scripts. However, the default name will be used in the input file.
