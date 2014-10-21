@@ -109,18 +109,20 @@ lattice = Diamond(directions=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
                   size=(1, 1, 1))
 
 #===============================================================================
-# Setup directories and mpi. You can setup the cp2k command (cp2k by default)
-# with calc.cp2k_command, and the mpi command (mpirun by default) with
-# calc.mpi_command. The input/output flag for cp2k is automatically set by
-# specifying calc.input_path/calc.output_path. MPI can be turned on or off with
+# Setup directories and mpi parallelization. You can setup the cp2k command
+# with calc.cp2k_command, and the mpi command with calc.mpi_command.
+# The input/output flag for cp2k is automatically set by specifying
+# calc.input_path/calc.output_path. MPI can be turned on or off with
 # calc.mpi_on (on by default). The -n flag can be setup with
 # calc.mpi_n_processes. Any special flags can be specified by using
-# calc.cp2k_flags or calc.mpi_flags.
+# calc.cp2k_flags or calc.mpi_flags. By default cp2k is run in the output
+# directory, but you can change the working directory with
+# calc.working_directory.
 calc = CP2K()
-script_path = "/home/lauri"
+output_path = "/home/lauri"
 project_name = "Si_bulk"
-calc.input_path = script_path + "/" + project_name + ".inp"
-calc.output_path = script_path + "/" + project_name + ".out"
+calc.input_path = output_path + "/" + project_name + ".inp"
+calc.output_path = output_path + "/" + project_name + ".out"
 calc.mpi_n_processes = 2
 
 #===============================================================================
@@ -128,7 +130,9 @@ calc.mpi_n_processes = 2
 # specify these but they will make your life easier.
 CP2K_INPUT = calc.CP2K_INPUT  # This is the root of the input tree
 GLOBAL = CP2K_INPUT.GLOBAL
-FORCE_EVAL = CP2K_INPUT.FORCE_EVAL_add()  # Repeatable items X are added with X_add() function
+# Repeatable sections are added with X_add() function. Optionally you can
+# provide the Section_parameter as an argument to this function.
+FORCE_EVAL = CP2K_INPUT.FORCE_EVAL_add()
 SUBSYS = FORCE_EVAL.SUBSYS
 DFT = FORCE_EVAL.DFT
 SCF = DFT.SCF
@@ -138,7 +142,14 @@ SCF = DFT.SCF
 # Most IDEs will be able to automatically suggest the entries as you begin
 # typing them. Relevant parts of the documentation have been copied to
 # parsedclasses.py and some IDEs provide quick access to them (e.g. in spyder
-# you can search documentation for keyword with the command "go to definition".
+# you can search documentation for keyword with the command "go to definition"
+
+# The keywords can entered as any python type that converts to string (int,
+# float, etc.). Additionally you can provide non-repeatable keywords as lists.
+# In that case the each list element is converted to string, separated with
+# white space and printed into input file. Repeatable keywords can also be
+# defined as lists, but in this case each list item corresponds to a new
+# repeated item. For an example of these features see examples/example_qmmm.py.
 GLOBAL.Run_type = "ENERGY_FORCE"
 GLOBAL.Project = "Si_bulk8"
 GLOBAL.Print_level = "LOW"
@@ -152,7 +163,7 @@ calc.create_coord(SUBSYS, lattice)
 
 FORCE_EVAL.Method = "Quickstep"
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
-DFT.Basis_set_file_name_add("BASIS_SET")
+DFT.Basis_set_file_name = "BASIS_SET"
 DFT.Potential_file_name = "GTH_POTENTIALS"
 DFT.QS.Eps_default = 1.0E-10
 DFT.MGRID.Ngrids = 4
@@ -170,8 +181,7 @@ SCF.MIXING.Alpha = 0.4
 SCF.MIXING.Nbroyden = 8
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
 
-KIND = SUBSYS.KIND_add()
-KIND.Section_parameters = "Si"
+KIND = SUBSYS.KIND_add("Si")  # Section_parameters can be provided as argument.
 KIND.Element = "Si"
 KIND.Basis_set = "DZVP-GTH-PADE"
 KIND.Potential = "GTH-PADE-q4"
@@ -190,7 +200,6 @@ calc.run()
 # 3. Write the input file, run CP2K as a subprocess and fetch results from the output file.
 print calc.get_potential_energy()
 print calc.get_forces()
-
 ```
 
 Important notes:
