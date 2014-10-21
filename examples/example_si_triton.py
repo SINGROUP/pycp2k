@@ -12,8 +12,8 @@ import time
 #===============================================================================
 # This is an example of how command line arguments can be extracted in python.
 calc = CP2K()
-calc.mpi_n_processes = 2
-calc.working_directory = "/home/lauri"
+calc.mpi_n_processes = 12
+calc.working_directory = "/triton/becs/work/himanel1/masters/results"
 calc.project_name = "si_bulk"
 
 #===============================================================================
@@ -41,8 +41,8 @@ calc.create_cell(SUBSYS, lattice)
 calc.create_coord(SUBSYS, lattice)
 FORCE_EVAL.Method = "Quickstep"
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
-DFT.Basis_set_file = "BASIS_SET"
-DFT.Potential_file_name = "GTH_POTENTIALS"
+DFT.Basis_set_file_name = "/triton/becs/work/himanel1/masters/simulations/BASIS_SET"
+DFT.Potential_file_name = "/triton/becs/work/himanel1/masters/simulations/GTH_POTENTIALS"
 DFT.QS.Eps_default = 1.0E-10
 DFT.MGRID.Ngrids = 4
 DFT.MGRID.Cutoff = 300
