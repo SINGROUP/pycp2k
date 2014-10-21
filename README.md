@@ -109,20 +109,19 @@ lattice = Diamond(directions=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
                   size=(1, 1, 1))
 
 #===============================================================================
-# Setup directories and mpi parallelization. You can setup the cp2k command
-# with calc.cp2k_command, and the mpi command with calc.mpi_command.
-# The input/output flag for cp2k is automatically set by specifying
-# calc.input_path/calc.output_path. MPI can be turned on or off with
-# calc.mpi_on (on by default). The -n flag can be setup with
-# calc.mpi_n_processes. Any special flags can be specified by using
+# Setup directories and mpi parallelization. If you specify a working directory
+# and a project name, the output and input file names and the
+# GLOBAL.Project_name keyword are automatically generated for you. You can
+# alternatively specify each separately. You can setup the cp2k command with
+# calc.cp2k_command, and the mpi command with calc.mpi_command.  MPI can be
+# turned on or off with calc.mpi_on (on by default). The -n flag can be setup
+# with calc.mpi_n_processes. Any special flags can be specified by using
 # calc.cp2k_flags or calc.mpi_flags. By default cp2k is run in the output
 # directory, but you can change the working directory with
 # calc.working_directory.
 calc = CP2K()
-output_path = "/home/lauri"
-project_name = "Si_bulk"
-calc.input_path = output_path + "/" + project_name + ".inp"
-calc.output_path = output_path + "/" + project_name + ".out"
+calc.working_directory = "/home/lauri"
+calc.project_name = "si_bulk"
 calc.mpi_n_processes = 2
 
 #===============================================================================
@@ -151,7 +150,6 @@ SCF = DFT.SCF
 # defined as lists, but in this case each list item corresponds to a new
 # repeated item. For an example of these features see examples/example_qmmm.py.
 GLOBAL.Run_type = "ENERGY_FORCE"
-GLOBAL.Project = "Si_bulk8"
 GLOBAL.Print_level = "LOW"
 
 # These utility functions will create entries to the input tree from the ASE
@@ -200,6 +198,7 @@ calc.run()
 # 3. Write the input file, run CP2K as a subprocess and fetch results from the output file.
 print calc.get_potential_energy()
 print calc.get_forces()
+
 ```
 
 Important notes:
