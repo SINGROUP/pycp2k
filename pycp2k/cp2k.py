@@ -10,6 +10,7 @@ from pycp2k.utilities import print_title, print_message, print_warning
 import re
 import pycp2k.config
 import numpy as np
+import os
 
 
 #===============================================================================
@@ -33,6 +34,9 @@ class CP2K(Calculator):
             Path where the input file is stored
         output_path: string
             Path where the output file is stored
+        output_path: string
+            Path in which CP2K is executed. Defaults to the output path
+            directory.
         cp2k_command: string
             The command with which CP2K is called
         cp2k_flags: dict
@@ -55,6 +59,7 @@ class CP2K(Calculator):
         self.CP2K_INPUT = _CP2K_INPUT1()
         self.input_path = input_path
         self.output_path = output_path
+        self.working_directory = None
         self.cp2k_command = pycp2k.config.cp2k_default_command
         self.cp2k_flags = {}
         self.mpi_on = True
@@ -189,8 +194,10 @@ class CP2K(Calculator):
             subsys: The SUBSYS for which the coordinates are created.
             atoms: The ASE Atoms object from which the coordinates are extracted.
         """
+        atom_list = []
         for atom in atoms:
-            subsys.COORD.Default_keyword_add(atom.symbol + " " + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]))
+            atom_list.append([atom.symbol, atom.position[0], atom.position[1], atom.position[2]])
+        subsys.COORD.Default_keyword = atom_list
 
     def create_constraints(self, subsys, motion, atoms):
         """Creates the atomic coordinates for a SUBSYS from an ASE Atoms object.
@@ -248,7 +255,12 @@ class CP2K(Calculator):
         if print_input:
             print_title("CP2K INPUT")
             print self.input
-        call(command_list, shell=False)
+        # Run in the output directory by default, can be changed with run_path
+        if self.working_directory is None:
+            working_directory = os.path.dirname(self.output_path)
+        else:
+            working_directory = self.working_directory
+        call(command_list, shell=False, cwd=working_directory)
 
         # Open the output file
         with open(self.output_path, 'r') as output_file:

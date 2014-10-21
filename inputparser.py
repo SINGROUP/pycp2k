@@ -70,10 +70,8 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     """
     default_keywords = []
     repeated_default_keywords = []
-    repeated_default_keyword_docs = []
     keywords = []
     repeated_keywords = []
-    repeated_keyword_docs = []
     subsections = []
     repeated_subsections = []
     repeatable_aliases = []
@@ -188,9 +186,9 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
 
                     # Special case for repeateable keywords.
                     if keyword.get("repeats") == "yes":
-                        public += "        self.list_" + newname + " = []\n"
+                        public += "        self." + newname + " = []\n"
+                        public += desc_text
                         repeated_keywords.append((newname, name))
-                        repeated_keyword_docs.append(desc_text)
                     else:
                         public += "        self." + newname + " = None\n"
                         public += desc_text
@@ -199,7 +197,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                 # Create properties for aliases
                 else:
                     if keyword.get("repeats") == "yes":
-                        public += "        self.list_" + newname + " = self.list_" + default_name + "\n"
+                        public += "        self." + newname + " = self." + default_name + "\n"
                         repeatable_aliases.append((newname, default_name))
                     else:
                         properties += ("\n    @property\n"
@@ -245,9 +243,9 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
         desc_text += "        \"\"\"\n"
 
         if default_keyword.get("repeats") == "yes":
-            public += "        self.list_" + newname + " = []\n"
+            public += "        self." + newname + " = []\n"
+            public += desc_text
             repeated_default_keywords.append((newname, name))
-            repeated_default_keyword_docs.append(desc_text)
         else:
             public += "        self." + newname + " = None\n"
             public += desc_text
@@ -266,7 +264,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
         # Special case for repeateable sections. Create a dictionary of the
         # subsections and add a function for creating them.
         if subsection.get("repeats") == "yes":
-            class_subsections += "        self.list_" + member_name + " = []\n"
+            class_subsections += "        self." + member_name + "_list = []\n"
             repeated_subsections.append((member_name, member_class_name))
         else:
             class_subsections += "        self." + member_name + " = " + member_class_name + "()\n"
@@ -287,35 +285,35 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     for repeated in repeated_subsections:
         attribute_name = repeated[0]
         attribute_class_name = repeated[1]
-        functions += ("    def " + attribute_name + "_add(self):\n"
+        functions += ("    def " + attribute_name + "_add(self, section_parameters=None):\n"
                       "        new_section = " + attribute_class_name + "()\n"
-                      "        self.list_" + attribute_name + ".append(new_section)\n"
+                      "        if section_parameters is not None:\n"
+                      "            if hasattr(new_section, 'Section_parameters'):\n"
+                      "                new_section.Section_parameters = section_parameters\n"
+                      "        self." + attribute_name + "_list.append(new_section)\n"
                       "        return new_section\n\n")
 
-    # Write a function for adding repeateable keywords
-    for i, repeated in enumerate(repeated_keywords):
-        functions += ("    def " + repeated[0] + "_add(self, value):\n" + repeated_keyword_docs[i] +
-                      "        self.list_" + repeated[0] + ".append(value)\n\n")
-
-    # Write a function for adding repeateable default keywords
-    for i, repeated in enumerate(repeated_default_keywords):
-        functions += ("    def " + repeated[0] + "_add(self, value):\n" + repeated_default_keyword_docs[i] +
-                      "        self.list_" + repeated[0] + ".append(value)\n\n")
-
-    # Write a function for adding aliased and repeateable keywords
-    for alias in repeatable_aliases:
-        functions += ("    def " + alias[0] + "_add(self, value):\n"
-                      "        \"\"\"\n"
-                      "        See documentation for function " + default_name + "_add()\n"
-                      "        \"\"\"\n"
-                      "        self.list_" + repeated[1] + ".append(value)\n\n")
+#    # Write a function for adding repeatable keywords
+#    for i, repeated in enumerate(repeated_keywords):
+#        functions += ("    def " + repeated[0] + "_add(self, value):\n"
+#                      "        self." + repeated[0] + ".append(value)\n\n")
+#
+#    # Write a function for adding repeateable default keywords
+#    for i, repeated in enumerate(repeated_default_keywords):
+#        functions += ("    def " + repeated[0] + "_add(self, value):\n"
+#                      "        self." + repeated[0] + ".append(value)\n\n")
+#
+#    # Write a function for adding aliased and repeateable keywords
+#    for alias in repeatable_aliases:
+#        functions += ("    def " + alias[0] + "_add(self, value):\n"
+#                      "        self." + repeated[1] + ".append(value)\n\n")
 
     # Write a function for printing original CP2K input files
     functions += ("    def print_input(self, level):\n"
                   "        return printable.print_input(self, level)\n")
 
     #---------------------------------------------------------------------------
-    # The class names are not unique.
+    # The class names are not unique. Use numbering to identify classes.
     exists = False
     version_number = version_dictionary.get(class_name)
     if version_number is None:

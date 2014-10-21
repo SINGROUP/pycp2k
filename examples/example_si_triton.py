@@ -44,7 +44,7 @@ calc.create_cell(SUBSYS, lattice)
 calc.create_coord(SUBSYS, lattice)
 FORCE_EVAL.Method = "Quickstep"
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
-DFT.Basis_set_file_name_add("BASIS_SET")
+DFT.Basis_set_file = "BASIS_SET"
 DFT.Potential_file_name = "GTH_POTENTIALS"
 DFT.QS.Eps_default = 1.0E-10
 DFT.MGRID.Ngrids = 4
@@ -62,8 +62,7 @@ SCF.MIXING.Alpha = 0.4
 SCF.MIXING.Nbroyden = 8
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
 
-KIND = SUBSYS.KIND_add()
-KIND.Section_parameters = "Si"
+KIND = SUBSYS.KIND_add("Si")
 KIND.Element = "Si"
 KIND.Basis_set = "DZVP-GTH-PADE"
 KIND.Potential = "GTH-PADE-q4"
