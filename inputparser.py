@@ -68,13 +68,15 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     and creates a python class for each section. Keywords, default keywords,
     section parameters and subsections are stored as attributes.
     """
-    default_keywords = []
-    repeated_default_keywords = []
-    keywords = []
-    repeated_keywords = []
-    subsections = []
-    repeated_subsections = []
-    repeatable_aliases = []
+    default_keywords = {}
+    repeated_default_keywords = {}
+    keywords = {}
+    repeated_keywords = {}
+    subsections = {}
+    repeated_subsections = {}
+    repeated_aliases = {}
+    aliases = {}
+    attributes = ["Default_keyword", "Section_parameters"]
     inp_name = ""
 
     # Initial string for each section of the class
@@ -188,18 +190,19 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                     if keyword.get("repeats") == "yes":
                         public += "        self." + newname + " = []\n"
                         public += desc_text
-                        repeated_keywords.append((newname, name))
+                        repeated_keywords[newname] = name
                     else:
                         public += "        self." + newname + " = None\n"
                         public += desc_text
-                        keywords.append((newname, name))
+                        keywords[newname] = name
 
                 # Create properties for aliases
                 else:
                     if keyword.get("repeats") == "yes":
                         public += "        self." + newname + " = self." + default_name + "\n"
-                        repeatable_aliases.append((newname, default_name))
+                        repeated_aliases[newname] = default_name
                     else:
+                        aliases[newname] = default_name
                         properties += ("\n    @property\n"
                                        "    def " + newname + "(self):\n"
                                        "        \"\"\"\n"
@@ -245,11 +248,11 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
         if default_keyword.get("repeats") == "yes":
             public += "        self." + newname + " = []\n"
             public += desc_text
-            repeated_default_keywords.append((newname, name))
+            repeated_default_keywords[newname] = name
         else:
             public += "        self." + newname + " = None\n"
             public += desc_text
-            default_keywords.append((newname, name))
+            default_keywords[newname] = name
 
     #---------------------------------------------------------------------------
     # Create attribute for each subsection
@@ -265,10 +268,11 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
         # subsections and add a function for creating them.
         if subsection.get("repeats") == "yes":
             class_subsections += "        self." + member_name + "_list = []\n"
-            repeated_subsections.append((member_name, member_class_name))
+            repeated_subsections[member_name] = member_class_name
+            attributes.append(member_name + "_list")
         else:
             class_subsections += "        self." + member_name + " = " + member_class_name + "()\n"
-            subsections.append((member_name, subsection.find("NAME").text))
+            subsections[member_name] = subsection.find("NAME").text
 
     #---------------------------------------------------------------------------
     # Write a list of the stored variable names
@@ -279,10 +283,13 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     private += "        self._repeated_default_keywords = " + str(repeated_default_keywords) + "\n"
     private += "        self._subsections = " + str(subsections) + "\n"
     private += "        self._repeated_subsections = " + str(repeated_subsections) + "\n"
-
+    private += "        self._aliases = " + str(aliases) + "\n"
+    private += "        self._repeated_aliases = " + str(repeated_aliases) + "\n"
+    private += "        self._attributes = " + str(attributes) + "\n"
+    
     #---------------------------------------------------------------------------
     # Write a function for adding repeateable sections
-    for repeated in repeated_subsections:
+    for repeated in repeated_subsections.iteritems():
         attribute_name = repeated[0]
         attribute_class_name = repeated[1]
         functions += ("    def " + attribute_name + "_add(self, section_parameters=None):\n"
@@ -292,21 +299,6 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                       "                new_section.Section_parameters = section_parameters\n"
                       "        self." + attribute_name + "_list.append(new_section)\n"
                       "        return new_section\n\n")
-
-#    # Write a function for adding repeatable keywords
-#    for i, repeated in enumerate(repeated_keywords):
-#        functions += ("    def " + repeated[0] + "_add(self, value):\n"
-#                      "        self." + repeated[0] + ".append(value)\n\n")
-#
-#    # Write a function for adding repeateable default keywords
-#    for i, repeated in enumerate(repeated_default_keywords):
-#        functions += ("    def " + repeated[0] + "_add(self, value):\n"
-#                      "        self." + repeated[0] + ".append(value)\n\n")
-#
-#    # Write a function for adding aliased and repeateable keywords
-#    for alias in repeatable_aliases:
-#        functions += ("    def " + alias[0] + "_add(self, value):\n"
-#                      "        self." + repeated[1] + ".append(value)\n\n")
 
     # Write a function for printing original CP2K input files
     functions += ("    def print_input(self, level):\n"

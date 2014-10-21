@@ -96,11 +96,11 @@ KIND.Potential = "GTH-PADE-q4"
 
 # 1. Only write the input file. CP2K is then run manually or with some other
 # script.
-calc.write_input_file()
+#calc.write_input_file()
 
 # 2. Write the input file and run CP2K as a subprocess in python.
-calc.run()
+#calc.run()
 
 # 3. Write the input file, run CP2K as a subprocess and fetch results from the output file.
 print calc.get_potential_energy()
-print calc.get_forces()
+#print calc.get_forces()

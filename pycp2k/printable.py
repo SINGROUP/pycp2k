@@ -8,15 +8,6 @@ from pycp2k.utilities import print_warning
 #===============================================================================
 class printable(object):
 
-    def __init__(self):
-        self._default_keywords = []
-        self._repeated_default_keywords = []
-        self._keywords = []
-        self._repeated_keywords = []
-        self._subsections = []
-        self._repeated_subsections = []
-        self._name = ""
-
     def parse_default_keyword(self, item, level):
         """Parses default keywords into sensible input sections."""
         if type(item) is list:
@@ -79,10 +70,34 @@ class printable(object):
         else:
             return (level + 1) * "  " + name + " " + str(item) + "\n"
 
+    def check_typos(self):
+        for attribute in self.__dict__.iterkeys():
+            found = False
+            if attribute in self._keywords.iterkeys():
+                found = True
+            if attribute in self._repeated_keywords.iterkeys():
+                found = True
+            if attribute in self._subsections.iterkeys():
+                found = True
+            if attribute in self._repeated_subsections.iterkeys():
+                found = True
+            if attribute in self._aliases.iterkeys():
+                found = True
+            if attribute in self._repeated_aliases.iterkeys():
+                found = True
+            if attribute in self._attributes:
+                found = True
+            if attribute[0] == "_":
+                found = True
+            if not found:
+                print_warning("Nonexisting keyword '" + attribute + "' defined in CP2K input tree. This might be a typo.")
+
     def print_input(self, level):
+        # Check if any undefined items have been created. These are usually typos.
+        self.check_typos()
         inp = ""
         # Non-repeatable default keywords
-        for attname, realname in self._default_keywords:
+        for attname, realname in self._default_keywords.iteritems():
             value = self.__dict__[attname]
             if value is not None:
                 if not (type(value) is list and not value):
@@ -90,7 +105,7 @@ class printable(object):
                     inp += parsed
 
         # Repeatable default keywords
-        for attname, realname in self._repeated_default_keywords:
+        for attname, realname in self._repeated_default_keywords.iteritems():
             keyword = self.__dict__[attname]
             if keyword is not None:
                 if not (type(keyword) is list and not keyword):
@@ -98,7 +113,7 @@ class printable(object):
                     inp += parsed
 
         # Non-repeatable keywords
-        for attname, realname in self._keywords:
+        for attname, realname in self._keywords.iteritems():
             value = self.__dict__[attname]
             if value is not None:
                 if not (type(value) is list and not value):
@@ -106,7 +121,7 @@ class printable(object):
                     inp += parsed
 
         # Repeatable keywords
-        for attname, realname in self._repeated_keywords:
+        for attname, realname in self._repeated_keywords.iteritems():
             keyword = self.__dict__[attname]
             if keyword is not None:
                 if not (type(keyword) is list and not keyword):
@@ -114,14 +129,14 @@ class printable(object):
                     inp += parsed
 
         # Non-repeatable subsections
-        for attname, realname in self._subsections:
+        for attname, realname in self._subsections.iteritems():
             value = self.__dict__[attname]
             substring = value.print_input(level + 1)
             if substring != "":
                 inp += substring + "\n"
 
         # Repeatable subsections
-        for attname, realname in self._repeated_subsections:
+        for attname, realname in self._repeated_subsections.iteritems():
             for subsection in self.__dict__[attname + "_list"]:
                 if subsection is not None:
                     substring = subsection.print_input(level + 1)
@@ -135,7 +150,7 @@ class printable(object):
             inp_header = level * "  " + "&" + self._name
             if hasattr(self, "Section_parameters"):
                 if self.Section_parameters is not None:
-                    parsed = self.parse_default_keyword(self.Section_parameters,-1)
+                    parsed = self.parse_default_keyword(self.Section_parameters, -1)
                     inp_header += " " + parsed
                     has_section_parameter = True
             if not has_section_parameter:
