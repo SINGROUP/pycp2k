@@ -14,7 +14,7 @@ import os
 
 
 #===============================================================================
-class CP2K(Calculator):
+class CP2K(Calculator, object):
     """Class for doing CP2K calculations.
 
     This class is an ASE compatible calculator interface for CP2K. You use it
@@ -60,6 +60,7 @@ class CP2K(Calculator):
         self.input_path = input_path
         self.output_path = output_path
         self.working_directory = None
+        self._project_name = None
         self.cp2k_command = pycp2k.config.cp2k_default_command
         self.cp2k_flags = {}
         self.mpi_on = True
@@ -69,9 +70,19 @@ class CP2K(Calculator):
         self.old_input = None
         self.new_input = None
         self.output = None
+        
+    @property
+    def project_name(self):
+        """Property for project name. Properties need new-style classes to work
+        so the class inherits object as well.
+        """
+        return self._project_name
 
-    def __del__(self):
-        """Destructor"""
+    @project_name.setter
+    def project_name(self, value):
+        """Setter for project name. Sets up the Project name in input tree."""
+        self._project_name = value
+        self.CP2K_INPUT.GLOBAL.Project_name = value
 
     def set_input_path(self, input_path):
         """Set the path where the input is located."""
@@ -108,12 +119,8 @@ class CP2K(Calculator):
 
     def get_forces(self, atoms=None):
         """Return the forces."""
-        #if self.calculation_required(quantities=["forces"]):
-            #self.run()
-
-        # Open the output file
-        with open(self.output_path, 'r') as output_file:
-            self.output = output_file.read()
+        if self.calculation_required(quantities=["forces"]):
+            self.run()
 
         force_matches = re.findall(r"ATOMIC FORCES in.*\n\n.*\n((?:\s{6}.*\n)*) SUM OF ATOMIC FORCES", self.output)
         if len(force_matches) != 0:
@@ -216,7 +223,7 @@ class CP2K(Calculator):
         self.new_input = self.CP2K_INPUT.print_input(-1)
 
         # Write the file
-        with open(self.input_path, 'w') as input_file:
+        with open(self.get_input_path(), 'w') as input_file:
             input_file.write(self.new_input)
 
     def read_input_file(self, file_name):
@@ -226,6 +233,20 @@ class CP2K(Calculator):
         # Open the file
         with open(self.file_name, 'r') as input_file:
             pass
+
+    def get_input_path(self):
+        """Determine input file path."""
+        if self.input_path is not None:
+            return self.input_path
+        else:
+            return self.working_directory + "/" + self.project_name + ".inp"
+
+    def get_output_path(self):
+        """Determine output file path."""
+        if self.output_path is not None:
+            return self.output_path
+        else:
+            return self.working_directory + "/" + self.project_name + ".out"
 
     def run(self, print_input=False, print_output=False):
         """Runs the input script."""
@@ -243,8 +264,8 @@ class CP2K(Calculator):
                 command_list.append(str(value))
 
         # CP2K command and flags
-        self.cp2k_flags["-o"] = self.output_path
-        self.cp2k_flags["-i"] = self.input_path
+        self.cp2k_flags["-o"] = self.get_output_path()
+        self.cp2k_flags["-i"] = self.get_input_path()
 
         command_list.append(self.cp2k_command)
         for flag, value in self.cp2k_flags.iteritems():
@@ -255,7 +276,8 @@ class CP2K(Calculator):
         if print_input:
             print_title("CP2K INPUT")
             print self.input
-        # Run in the output directory by default, can be changed with run_path
+
+        # Run in the output directory by default, can be changed with working_directory
         if self.working_directory is None:
             working_directory = os.path.dirname(self.output_path)
         else:
@@ -263,7 +285,7 @@ class CP2K(Calculator):
         call(command_list, shell=False, cwd=working_directory)
 
         # Open the output file
-        with open(self.output_path, 'r') as output_file:
+        with open(self.get_output_path(), 'r') as output_file:
             self.output = output_file.read()
 
         if print_output:

@@ -7,10 +7,8 @@ from pycp2k.cp2k import CP2K
 #===============================================================================
 # Setup calculator
 calc = CP2K()
-script_path = "/home/lauri"
-project_name = "qmmmwater"
-calc.input_path = script_path + "/" + project_name + ".inp"
-calc.output_path = script_path + "/" + project_name + ".out"
+calc.working_directory = "/home/lauri"
+calc.project_name = "qmmmwater"
 calc.mpi_n_processes = 2
 
 #===============================================================================
@@ -26,7 +24,6 @@ FORCEFIELD = FORCE_EVAL.MM.FORCEFIELD
 #===============================================================================
 # GLOBAL
 GLOBAL.Run_type = "MD"
-GLOBAL.Project = project_name
 
 #===============================================================================
 # FORCE EVAL

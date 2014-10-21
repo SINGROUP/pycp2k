@@ -12,18 +12,16 @@ import time
 #===============================================================================
 # This is an example of how command line arguments can be extracted in python.
 calc = CP2K()
-calc.mpi_n_processes = 12
-script_path = "/triton/becs/work/himanel1/masters/results"
-project_name = "Si_bulk"
-calc.input_path = script_path + "/" + project_name + ".inp"
-calc.output_path = script_path + "/" + project_name + ".out"
+calc.mpi_n_processes = 2
+calc.working_directory = "/home/lauri"
+calc.project_name = "si_bulk"
 
 #===============================================================================
 # Structure
 lattice = Diamond(directions=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
                   symbol='Si',
                   latticeconstant=5.430697500,
-                  size=(2, 2, 2))
+                  size=(1, 1, 1))
 
 #===============================================================================
 # Shortcuts
@@ -37,7 +35,6 @@ SCF = DFT.SCF
 #===============================================================================
 # Input
 GLOBAL.Run_type = "ENERGY_FORCE"
-GLOBAL.Project = "Si_bulk8"
 GLOBAL.Print_level = "LOW"
 
 calc.create_cell(SUBSYS, lattice)

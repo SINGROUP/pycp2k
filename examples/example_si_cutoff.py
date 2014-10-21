@@ -17,10 +17,8 @@ view(lattice)
 #===============================================================================
 # Setup directories and mpi
 calc = CP2K()
-script_path = "/home/lauri"
-project_name = "Si_bulk"
-calc.input_path = script_path + "/" + project_name + ".inp"
-calc.output_path = script_path + "/" + project_name + ".out"
+calc.working_directory = "/home/lauri"
+calc.project_name = "si_bulk"
 calc.mpi_n_processes = 2
 
 #===============================================================================
@@ -35,7 +33,6 @@ SCF = DFT.SCF
 #===============================================================================
 # Fill input tree
 GLOBAL.Run_type = "ENERGY"
-GLOBAL.Project = project_name
 GLOBAL.Print_level = "LOW"
 
 calc.create_cell(SUBSYS, lattice)
@@ -70,7 +67,7 @@ KIND.Potential = "GTH-PADE-q4"
 energies = []
 for cutoff in range(40, 90, 20):
     DFT.MGRID.Cutoff = cutoff
-    calc.output_path = "/home/lauri/" + project_name + str(cutoff) + ".out"
+    calc.output_path = calc.working_directory + "/" + calc.project_name + str(cutoff) + ".out"
     energies.append(calc.get_potential_energy())
 
 print energies
