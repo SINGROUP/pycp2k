@@ -195,7 +195,7 @@ class CP2K(Calculator, object):
         else:
             subsys.CELL.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
 
-    def create_coordinates(self, subsys, atoms):
+    def create_coord(self, subsys, atoms):
         """Creates the atomic coordinates for a SUBSYS from an ASE Atoms object.
 
         args:

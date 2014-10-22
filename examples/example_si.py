@@ -63,7 +63,7 @@ GLOBAL.Print_level = "LOW"
 # subsys where the entries should be created and the Atoms object from which
 # they are exctracted.
 calc.create_cell(SUBSYS, lattice)
-calc.create_coordinates(SUBSYS, lattice)
+calc.create_coord(SUBSYS, lattice)
 
 FORCE_EVAL.Method = "Quickstep"
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"

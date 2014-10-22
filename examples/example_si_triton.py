@@ -38,7 +38,7 @@ GLOBAL.Run_type = "ENERGY_FORCE"
 GLOBAL.Print_level = "LOW"
 
 calc.create_cell(SUBSYS, lattice)
-calc.create_coordinates(SUBSYS, lattice)
+calc.create_coord(SUBSYS, lattice)
 FORCE_EVAL.Method = "Quickstep"
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
 DFT.Basis_set_file_name = "/triton/becs/work/himanel1/masters/simulations/BASIS_SET"
