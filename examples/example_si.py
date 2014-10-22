@@ -59,11 +59,11 @@ GLOBAL.Run_type = "ENERGY_FORCE"
 GLOBAL.Print_level = "LOW"
 
 # These utility functions will create entries to the input tree from the ASE
-# Atoms object created earlier. As arguments you should give the subsys where
-# the entries should be created and the Atoms object from which they are
-# exctracted.
+# Atoms object created earlier. As arguments these two functions take the
+# subsys where the entries should be created and the Atoms object from which
+# they are exctracted.
 calc.create_cell(SUBSYS, lattice)
-calc.create_coord(SUBSYS, lattice)
+calc.create_coordinates(SUBSYS, lattice)
 
 FORCE_EVAL.Method = "Quickstep"
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
@@ -96,11 +96,11 @@ KIND.Potential = "GTH-PADE-q4"
 
 # 1. Only write the input file. CP2K is then run manually or with some other
 # script.
-#calc.write_input_file()
+calc.write_input_file()
 
 # 2. Write the input file and run CP2K as a subprocess in python.
-#calc.run()
+calc.run()
 
 # 3. Write the input file, run CP2K as a subprocess and fetch results from the output file.
 print calc.get_potential_energy()
-#print calc.get_forces()
+print calc.get_forces()

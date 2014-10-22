@@ -116,7 +116,7 @@ def main():
     # Ask for the default CP2K command
     print "|------------------------------------------------------------------------------|"
     print textwrap.fill("Choose the default CP2K executable. This executable is used by default for running CP2K. It can be changed by modifying config.py in the pycp2k folder, and can be dynamically overridden for each simulation with the 'cp2k_command' attribute.", width=80)
-    print "\n"
+    print ""
     for i, [name, avail] in enumerate(cp2k_commands):
             print "    [" + str(i+1) + "] " + name
     print "    [" + str(len(cp2k_commands)+1) + "] Custom CP2K executable name\n"
@@ -138,9 +138,10 @@ def main():
     # Ask for the default MPI command
     print "|------------------------------------------------------------------------------|"
     print textwrap.fill("Choose the default MPI executable. This executable is used by default for MPI parallel runs. It can be changed by modifying config.py in the pycp2k folder, and can be dynamically overridden for each simulation with the 'mpi_command' attribute.", width=80)
-    mpi_commands = ["mpirun"]
+    print ""
+    mpi_commands = ["mpirun", "srun --mpi=openmpi", "srun --mpi=pmi2"]
     for i, name in enumerate(mpi_commands):
-        print "\n    [" + str(i+1) + "] " + name
+        print "    [" + str(i+1) + "] " + name
     print "    [" + str(len(mpi_commands)+1) + "] Custom MPI executable name\n"
     valid_number = False
     while not valid_number:

@@ -72,29 +72,31 @@ class printable(object):
 
     def check_typos(self):
         for attribute in self.__dict__.iterkeys():
-            found = False
+            typos_found = True
             if attribute in self._keywords.iterkeys():
-                found = True
-            if attribute in self._repeated_keywords.iterkeys():
-                found = True
-            if attribute in self._subsections.iterkeys():
-                found = True
-            if attribute in self._repeated_subsections.iterkeys():
-                found = True
-            if attribute in self._aliases.iterkeys():
-                found = True
-            if attribute in self._repeated_aliases.iterkeys():
-                found = True
-            if attribute in self._attributes:
-                found = True
-            if attribute[0] == "_":
-                found = True
-            if not found:
-                print_warning("Nonexisting keyword '" + attribute + "' defined in CP2K input tree. This might be a typo.")
+                typos_found = False
+            elif attribute in self._repeated_keywords.iterkeys():
+                typos_found = False
+            elif attribute in self._subsections.iterkeys():
+                typos_found = False
+            elif attribute in self._repeated_subsections.iterkeys():
+                typos_found = False
+            elif attribute in self._aliases.iterkeys():
+                typos_found = False
+            elif attribute in self._repeated_aliases.iterkeys():
+                typos_found = False
+            elif attribute in self._attributes:
+                typos_found = False
+            elif attribute[0] == "_":
+                typos_found = False
+            if typos_found:
+                raise Exception("Nonexisting keyword '" + attribute + "' defined in CP2K input tree section '" + self._name + "'. This might be a typo.")
 
     def print_input(self, level):
+
         # Check if any undefined items have been created. These are usually typos.
         self.check_typos()
+
         inp = ""
         # Non-repeatable default keywords
         for attname, realname in self._default_keywords.iteritems():

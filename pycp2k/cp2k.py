@@ -11,6 +11,7 @@ import re
 import pycp2k.config
 import numpy as np
 import os
+import pipes
 
 
 #===============================================================================
@@ -70,7 +71,7 @@ class CP2K(Calculator, object):
         self.old_input = None
         self.new_input = None
         self.output = None
-        
+
     @property
     def project_name(self):
         """Property for project name. Properties need new-style classes to work
@@ -172,7 +173,7 @@ class CP2K(Calculator, object):
 
         Creates the cell unit vectors and replicates the periodic boundary
         conditions. Notice that this doesn't affect the PBCs used for
-        electrostatics! (use POISSON.PERIODIC)
+        electrostatics! (use create_poisson_periodicity())
 
         args:
             subsys: pycp2k.parsedclasses._subsys1
@@ -194,7 +195,7 @@ class CP2K(Calculator, object):
         else:
             subsys.CELL.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
 
-    def create_coord(self, subsys, atoms):
+    def create_coordinates(self, subsys, atoms):
         """Creates the atomic coordinates for a SUBSYS from an ASE Atoms object.
 
         args:
@@ -206,12 +207,29 @@ class CP2K(Calculator, object):
             atom_list.append([atom.symbol, atom.position[0], atom.position[1], atom.position[2]])
         subsys.COORD.Default_keyword = atom_list
 
-    def create_constraints(self, subsys, motion, atoms):
-        """Creates the atomic coordinates for a SUBSYS from an ASE Atoms object.
+    def create_poisson_periodicity(self, poisson, atoms):
+        """Creates the poisson periodicity for a POISSON section from an ASE
+        Atoms object.
 
         args:
-            subsys: The SUBSYS from which.
-            atoms: The ASE Atoms object from which the coordinates are extracted.
+            poisson: POISSON section
+                The poisson section from DFT or MM for which the periodicity is
+                created.
+            atoms: ASE Atoms object
+                The atoms from which the periodicity is extracted.
+        """
+        pbc = atoms.get_pbc()
+        if not any(pbc):
+            poisson.Periodic = "NONE"
+        else:
+            poisson.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
+
+    def create_constraints(self, subsys, atoms):
+        """Creates contraints for the the given SUBSYS from the given ASE Atoms object.
+
+        args:
+            subsys: The SUBSYS for which the contraints apply.
+            atoms: The ASE Atoms object from which the contraints are extracted.
         """
         pass
 
@@ -272,7 +290,11 @@ class CP2K(Calculator, object):
             command_list.append(str(flag))
             command_list.append(str(value))
 
-        print_message("CP2K START", "Calculation started with command " + " ".join(command_list))
+        # When shell=True the command is passed as string rather than a
+        # sequence as instructed in subprocess documentation.
+        command_string = " ".join(command_list)
+
+        print_message("CP2K START", "Calculation started with command " + command_string)
         if print_input:
             print_title("CP2K INPUT")
             print self.input
@@ -282,7 +304,10 @@ class CP2K(Calculator, object):
             working_directory = os.path.dirname(self.output_path)
         else:
             working_directory = self.working_directory
-        call(command_list, shell=False, cwd=working_directory)
+
+        # Call the subprocess. shell=True is used to access srun and
+        # environment variable expansions.
+        call(command_string, shell=True, cwd=working_directory)
 
         # Open the output file
         with open(self.get_output_path(), 'r') as output_file:
