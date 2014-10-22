@@ -55,7 +55,7 @@ These instructions were made for and tested on Triton, but they should be extens
       git clone https://github.com/lauri-codes/PYCP2K.git
       ```
       
-   3. Install the package locally. If you loaded the cp2k module you should be able to create the input structure from the cp2k executable. When the setup asks for default MPI executable provide an appropriate srun command.
+   3. Install the package locally. If you loaded the cp2k module you should be able to create the input structure from the cp2k executable. When the setup asks for default MPI executable provide an appropriate *srun* command.
    
       ```
       python setup.py install --user
@@ -151,9 +151,9 @@ GLOBAL.Run_type = "ENERGY_FORCE"
 GLOBAL.Print_level = "LOW"
 
 # These utility functions will create entries to the input tree from the ASE
-# Atoms object created earlier. As arguments you should give the subsys where
-# the entries should be created and the Atoms object from which they are
-# exctracted.
+# Atoms object created earlier. As arguments these two functions take the
+# subsys where the entries should be created and the Atoms object from which
+# they are exctracted.
 calc.create_cell(SUBSYS, lattice)
 calc.create_coord(SUBSYS, lattice)
 
@@ -196,7 +196,6 @@ calc.run()
 # 3. Write the input file, run CP2K as a subprocess and fetch results from the output file.
 print calc.get_potential_energy()
 print calc.get_forces()
-
 ```
 
 Important notes:
