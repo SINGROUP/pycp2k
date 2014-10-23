@@ -70,7 +70,7 @@ These instructions were made for and tested on Triton, but they should be extens
       #!/bin/sh
       #SBATCH -n 12
       #SBATCH -N 1
-      #SBATCH --constraint=xeon
+      #SBATCH --constraint=xeon|xeonib
       #SBATCH --time=10:00
       #SBATCH --mem-per-cpu=500
 
@@ -85,7 +85,7 @@ These instructions were made for and tested on Triton, but they should be extens
       
       NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
       
-      NOTE: The nodes are constrained to xeons for stability reason. The default version of cp2k on triton seems to only properly work on xeon nodes with the mpirun command.
+      NOTE: The nodes are constrained to xeon/xeonib because the default version of cp2k on triton will not run on opteron nodes. On xeon ivy bridge nodes you might get a warning about fabric initialization but the calculations seem to run normally.
 
 Example Script
 ------------------
