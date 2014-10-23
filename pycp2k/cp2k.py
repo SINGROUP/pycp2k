@@ -4,26 +4,29 @@
 """This module defines an ASE calculator interface to CP2K."""
 
 from pycp2k.parsedclasses import _CP2K_INPUT1
+from pycp2k.utilities import print_title, print_message, print_warning
+import pycp2k.config
 from ase.calculators.interface import Calculator
 from subprocess import call
-from pycp2k.utilities import print_title, print_message, print_warning
 import re
-import pycp2k.config
 import numpy as np
 import os
-import pipes
+from ase.constraints import FixAtoms, FixBondLength
 
 
 #===============================================================================
 class CP2K(Calculator, object):
-    """Class for doing CP2K calculations.
+    """Class for creating and running CP2K calculations.
 
-    This class is an ASE compatible calculator interface for CP2K. You use it
-    to create an input file for CP2K in a pythonic object-oriented way. The
-    advantages of this are:
-        -Access to ASE's structure creation tools
+    This is the main class of the pycp2k package. You use it to create an input
+    for CP2K in a pythonic object-oriented way and you can also directly run
+    cp2k with the input.
+
+    The advantages of doing CP2K calculations with PYCP2K are:
+
+        -Script complex runs with python
+        -Structure creation with ASE
         -ASE input/output
-        -Script multiple runs with python
         -Automatic syntax correctness for the input file
         -Code completion if provided by your python IDE
         -Quick access to documentation if provided by your IDE
@@ -35,27 +38,35 @@ class CP2K(Calculator, object):
             Path where the input file is stored
         output_path: string
             Path where the output file is stored
-        output_path: string
+        working_directory: string
             Path in which CP2K is executed. Defaults to the output path
-            directory.
+            directory if not specified.
+        project_name: string
+            If given, this attribute together with working_directory is used
+            for naming the input and output files. Also sets the
+            GLOBAL.Project_name.
         cp2k_command: string
             The command with which CP2K is called
         cp2k_flags: dict
-            Contains any additional cp2k executable flags
+            Contains any additional cp2k executable flags. Usage:
+            cp2k_flags.append("--xml")
         mpi_on: bool
             Whether MPI parallellization should be used
         mpi_flags: dict
-            Contains any additional MPI executable flags
+            Contains any additional MPI executable flags. Usage:
+            mpi_flags.append("-debug")
         mpi_command: string
             The name of MPI command
+        mpi_n_processes: int
+            The number of processes used by MPI
         old_input: string
-            The input file for the last CP2K run
+            The input file for the latest succesful CP2K run
         new_input: string
             The input file for a new CP2K run
         output: string
             The output of the last CP2K run
     """
-    def __init__(self, input_path=None, output_path=None):
+    def __init__(self, atoms=None, input_path=None, output_path=None):
         """Construct CP2K-calculator object."""
         self.CP2K_INPUT = _CP2K_INPUT1()
         self.input_path = input_path
@@ -63,9 +74,9 @@ class CP2K(Calculator, object):
         self.working_directory = None
         self._project_name = None
         self.cp2k_command = pycp2k.config.cp2k_default_command
-        self.cp2k_flags = {}
+        self.cp2k_flags = []
         self.mpi_on = True
-        self.mpi_flags = {}
+        self.mpi_flags = []
         self.mpi_n_processes = None
         self.mpi_command = pycp2k.config.mpi_default_command
         self.old_input = None
@@ -85,13 +96,13 @@ class CP2K(Calculator, object):
         self._project_name = value
         self.CP2K_INPUT.GLOBAL.Project_name = value
 
-    def set_input_path(self, input_path):
-        """Set the path where the input is located."""
-        self.input_path = input_path
+    def set_atoms(atoms):
+        """Reads all the supported properties from an ASE Atoms object into the
+        CP2K input.
 
-    def set_output_path(self, output_path):
-        """Set the path where all the output is stored."""
-        self.output_path = output_path
+        Basically this means that all the 
+        """
+        pass
 
     def calculation_required(self, atoms=None, quantities=None):
         """Check if a calculation is required.
@@ -105,6 +116,10 @@ class CP2K(Calculator, object):
         Because it is very hard to know what parameters affect the calculation
         of different quantities (energy, forces, etc.), this function simply
         checks that has the input file changed since last evaluation.
+
+        args:
+            quantitities: list of strings
+                The names of the required quantitities.
         """
         available_quantities = ["energy", "forces"]
         for quantity in quantities:
@@ -119,7 +134,11 @@ class CP2K(Calculator, object):
             return new_input != self.old_input
 
     def get_forces(self, atoms=None):
-        """Return the forces."""
+        """Return the forces.
+
+        Returns a numpy array of 3D forces for each atom in the same order in
+        which atoms have been defined.
+        """
         if self.calculation_required(quantities=["forces"]):
             self.run()
 
@@ -165,15 +184,12 @@ class CP2K(Calculator, object):
         else:
             raise Exception("'ENERGY' entry was not found in the CP2K output file. Please make sure that you have the correct 'GLOBAL.Run_type'")
 
-    def get_stress(self, atoms):
-        """Return the stress."""
-
     def create_cell(self, subsys, atoms):
         """Creates the cell for a SUBSYS from an ASE Atoms object.
 
         Creates the cell unit vectors and replicates the periodic boundary
         conditions. Notice that this doesn't affect the PBCs used for
-        electrostatics! (use create_poisson_periodicity())
+        electrostatics! (use create_poisson())
 
         args:
             subsys: pycp2k.parsedclasses._subsys1
@@ -190,52 +206,86 @@ class CP2K(Calculator, object):
         subsys.CELL.C = str(C[0]) + " " + str(C[1]) + " " + str(C[2])
 
         pbc = atoms.get_pbc()
-        if not any(pbc):
+        if sum(pbc) == 0:
             subsys.CELL.Periodic = "NONE"
         else:
             subsys.CELL.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
 
-    def create_coord(self, subsys, atoms):
+    def create_coord(self, subsys, atoms, molnames=None):
         """Creates the atomic coordinates for a SUBSYS from an ASE Atoms object.
 
         args:
-            subsys: The SUBSYS for which the coordinates are created.
-            atoms: The ASE Atoms object from which the coordinates are extracted.
+            subsys: pycp2k.parsedclasses._subsys1
+                The SUBSYS for which the coordinates are created.
+            atoms: ASE Atoms
+                Atoms from which the coordinates are extracted.
+            molnames: list of strings
+                The MOLNAME for each atom in correct order
         """
         atom_list = []
-        for atom in atoms:
-            atom_list.append([atom.symbol, atom.position[0], atom.position[1], atom.position[2]])
+        for i_atom, atom in enumerate(atoms):
+            new_atom = [atom.symbol, atom.position[0], atom.position[1], atom.position[2]]
+            if molnames is not None:
+                new_atom.append(molnames[i_atom])
+            atom_list.append(new_atom)
         subsys.COORD.Default_keyword = atom_list
 
-    def create_poisson_periodicity(self, poisson, atoms):
-        """Creates the poisson periodicity for a POISSON section from an ASE
-        Atoms object.
+    def create_poisson(self, poisson, atoms):
+        """Creates the periodicity for a POISSON section and tries to guess a
+        good solver.
 
         args:
-            poisson: POISSON section
+            poisson: pycp2k.parsedclasses._poisson1
                 The poisson section from DFT or MM for which the periodicity is
                 created.
-            atoms: ASE Atoms object
+            atoms: ASE Atoms
                 The atoms from which the periodicity is extracted.
         """
+        # Define periodicity
         pbc = atoms.get_pbc()
-        if not any(pbc):
+        if sum(pbc) == 0:
             poisson.Periodic = "NONE"
         else:
             poisson.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
 
-    def create_constraints(self, subsys, atoms):
-        """Creates contraints for the the given SUBSYS from the given ASE Atoms object.
+    def create_fixed_atoms(self, subsys, atoms):
+        """Creates the constraints corresponding to ASE's FixAtoms class.
+
+        The way constraints are defined in ASE and CP2K are very different.
+        Only few special cases have a 1-to-1 mapping between them and thus most
+        CP2K constraints cannot be created from ASE constraints. FixAtoms is
+        one of the special cases.
 
         args:
-            subsys: The SUBSYS for which the contraints apply.
-            atoms: The ASE Atoms object from which the contraints are extracted.
+            subsys: pycp2k.parsedclasses._subsys1
+                The SUBSYS for which the contraint applies.
+            atoms: ASE Atoms
+                Atoms from which the FixAtom contraint is extracted.
         """
-        pass
+        CONSTRAINT = self.CP2K_INPUT.MOTION.CONSTRAINT
+        constraints = atoms._constraints
+        n_constraints = 0
+        if type(constraints) is not list:
+            constraints = [constraints]
+        for constraint in constraints:
+            # FixAtoms -> CONSTRAINT.FIXED_ATOMS
+            n_constraints += 1
+            if isinstance(constraint, FixAtoms):
+                if len(constraint.index) == len(atoms) and all(i <= 1 for i in constraint.index):
+                    indices = np.where(constraint.index)[0]
+                else:
+                    indices = constraint.index
+                # CP2K indexing starts at 1
+                indices = [x+1 for x in indices]
+                fixed_atoms = CONSTRAINT.FIXED_ATOMS_add()
+                fixed_atoms.Components_to_fix = "XYZ"
+                fixed_atoms.List = " ".join(map(str, indices))
+        if n_constraints == 0:
+            print_warning("No 'FixAtoms' constraints found.")
 
     def write_input_file(self):
         """Creates an input file for CP2K executable from the object tree
-        defined in CP2K_INPUT
+        defined in CP2K_INPUT.
         """
         self.old_input = self.new_input
         self.new_input = self.CP2K_INPUT.print_input(-1)
@@ -243,14 +293,6 @@ class CP2K(Calculator, object):
         # Write the file
         with open(self.get_input_path(), 'w') as input_file:
             input_file.write(self.new_input)
-
-    def read_input_file(self, file_name):
-        """Reads an existing CP2K input file and creates the corresponding
-        object tree from it"""
-
-        # Open the file
-        with open(self.file_name, 'r') as input_file:
-            pass
 
     def get_input_path(self):
         """Determine input file path."""
@@ -276,19 +318,16 @@ class CP2K(Calculator, object):
         if self.mpi_on:
             command_list.append(self.mpi_command)
             if self.mpi_n_processes is not None:
-                self.mpi_flags["-n"] = self.mpi_n_processes
-            for flag, value in self.mpi_flags.iteritems():
+                command_list.append("-n " + str(self.mpi_n_processes))
+            for flag in self.mpi_flags:
                 command_list.append(str(flag))
-                command_list.append(str(value))
 
         # CP2K command and flags
-        self.cp2k_flags["-o"] = self.get_output_path()
-        self.cp2k_flags["-i"] = self.get_input_path()
-
         command_list.append(self.cp2k_command)
-        for flag, value in self.cp2k_flags.iteritems():
+        command_list.append("-o " + str(self.get_output_path()))
+        command_list.append("-i " + str(self.get_input_path()))
+        for flag in self.cp2k_flags:
             command_list.append(str(flag))
-            command_list.append(str(value))
 
         # When shell=True the command is passed as string rather than a
         # sequence as instructed in subprocess documentation.
@@ -316,3 +355,21 @@ class CP2K(Calculator, object):
         if print_output:
             print_title("CP2K OUTPUT")
             print self.output
+
+    def vmd_view_trajectory(self):
+        """View the MD trajectory with VMD.
+        
+        Opens a blocking vmd window and loads the .xyz file created from MD
+        simulation.
+        """
+        # Run in the output directory by default, can be changed with working_directory
+        if self.working_directory is None:
+            working_directory = os.path.dirname(self.output_path)
+        else:
+            working_directory = self.working_directory
+
+        filename = working_directory + "/" + self.CP2K_INPUT.GLOBAL.Project_name + "-pos-1.xyz"
+        command = "vmd " + filename
+        # Call the subprocess. shell=True is used to access srun and
+        # environment variable expansions.
+        call(command, shell=True, cwd=working_directory)

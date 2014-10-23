@@ -2,7 +2,6 @@
 
 """Defines a printing interface which all classes parsed by inputparser.py will
 follow."""
-from pycp2k.utilities import print_warning
 
 
 #===============================================================================

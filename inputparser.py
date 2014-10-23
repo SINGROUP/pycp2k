@@ -286,7 +286,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     private += "        self._aliases = " + str(aliases) + "\n"
     private += "        self._repeated_aliases = " + str(repeated_aliases) + "\n"
     private += "        self._attributes = " + str(attributes) + "\n"
-    
+
     #---------------------------------------------------------------------------
     # Write a function for adding repeateable sections
     for repeated in repeated_subsections.iteritems():
@@ -307,22 +307,23 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     #---------------------------------------------------------------------------
     # The class names are not unique. Use numbering to identify classes.
     exists = False
+    class_string = docstring + public + class_subsections + private + functions + properties + setters
     version_number = version_dictionary.get(class_name)
     if version_number is None:
         version_dictionary[class_name] = 1
-        class_dictionary[class_name+str(1)] = docstring + public + class_subsections + private + functions + properties + setters
+        class_dictionary[class_name+str(1)] = class_string
         return class_name+str(1)
 
     for version in range(version_number):
         old_class_body = class_dictionary[class_name+str(version + 1)]
-        if old_class_body == class_body:
+        if old_class_body == class_string:
             exists = True
             version_number = version + 1
             break
 
     if not exists:
         version_dictionary[class_name] = version_number + 1
-        class_dictionary[class_name+str(version_number + 1)] = docstring + public + class_subsections + private + functions + properties + setters
+        class_dictionary[class_name+str(version_number + 1)] = class_string
         return class_name + str(version_number + 1)
     else:
         return class_name + str(version_number)
