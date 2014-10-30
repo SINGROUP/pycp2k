@@ -63,6 +63,48 @@ def validify_keyword(string):
 
 
 #===============================================================================
+def create_docstring(item):
+    description = item.find("DESCRIPTION")
+    default_value = item.find("DEFAULT_VALUE")
+    default_unit = item.find("DEFAULT_UNIT")
+
+    # Description
+    output = "        \"\"\"\n"
+    if description is not None:
+        if description.text is not None:
+            for line in textwrap.wrap(description.text):
+                output += "        " + line + "\n"
+
+    # If the values are enumerated, document the possible values
+    data_type = item.find("DATA_TYPE")
+    if data_type.get("kind") == "keyword":
+        output += "\n        Available values:\n"
+        enumerations = data_type.find("ENUMERATION")
+        for enum in enumerations.findall("ITEM"):
+            output += "            " + enum.find("NAME").text + "\n"
+            enum_description = enum.find("DESCRIPTION").text
+            if enum_description is not None:
+                for line in textwrap.wrap(enum_description):
+                    output += "                " + line + "\n"
+
+    # Default value
+    if default_value is not None:
+        if default_value.text is not None:
+            output += "\n        Default value:\n"
+            for line in textwrap.wrap(default_value.text):
+                output += "            " + line + "\n"
+
+    # Default unit
+    if default_unit is not None:
+        output += "\n        Default unit:\n"
+        if default_unit.text is not None:
+            for line in textwrap.wrap(default_unit.text):
+                output += "            " + line + "\n"
+    output += "        \"\"\"\n"
+    return output
+
+
+#===============================================================================
 def recursive_class_creation(section, level, class_dictionary, version_dictionary):
     """Recursively goes throught the .xml file created by cp2k --xml command
     and creates a python class for each section. Keywords, default keywords,
@@ -76,7 +118,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     repeated_subsections = {}
     repeated_aliases = {}
     aliases = {}
-    attributes = ["Default_keyword", "Section_parameters"]
+    attributes = []
     inp_name = ""
 
     # Initial string for each section of the class
@@ -100,7 +142,6 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
         class_name = "_" + class_name.lower()
 
     # Start writing class body
-    class_body = ""
     section_description = section.find("DESCRIPTION")
     if section_description is not None and section_description.text is not None:
         docstring += "    \"\"\"\n"
@@ -114,30 +155,11 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     # Create attribute for section parameter
     section_parameters = section.find("SECTION_PARAMETERS")
     if section_parameters is not None:
+        attributes.append("Section_parameters")
         public += "        self.Section_parameters = None\n"
 
         # Write the description for the section parameter
-        description = section_parameters.find("DESCRIPTION").text
-        public += "        \"\"\"\n"
-        if description is not None:
-            for line in textwrap.wrap(description):
-                public += "        " + line + "\n"
-        else:
-            public += "\n"
-
-        # If the values are enumerated, document the possible values
-        data_type = section_parameters.find("DATA_TYPE")
-        if data_type.get("kind") == "keyword":
-            public += "\n        Available values:\n"
-            enumerations = data_type.find("ENUMERATION")
-            for enum in enumerations.findall("ITEM"):
-                public += "            " + enum.find("NAME").text + "\n"
-                enum_description = enum.find("DESCRIPTION").text
-                if enum_description is not None:
-                    for line in textwrap.wrap(enum_description):
-                        public += "                " + line + "\n"
-
-        public += "        \"\"\"\n"
+        public += create_docstring(section_parameters)
 
     #---------------------------------------------------------------------------
     # Create attribute for all the keywords
@@ -161,39 +183,17 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                 name = keyname.text
                 newname = validify_keyword(name)
 
-                # Write the description for the keyword
-                description = keyword.find("DESCRIPTION").text
-                desc_text = "        \"\"\"\n"
-                if description is not None:
-                    for line in textwrap.wrap(description):
-                        desc_text += "        " + line + "\n"
-                else:
-                    desc_text += "\n"
-
-                # If the values are enumerated, document the possible values
-                data_type = keyword.find("DATA_TYPE")
-                if data_type.get("kind") == "keyword":
-                    desc_text += "\n        Available values:\n"
-                    enumerations = data_type.find("ENUMERATION")
-                    for enum in enumerations.findall("ITEM"):
-                        desc_text += "            " + enum.find("NAME").text + "\n"
-                        enum_description = enum.find("DESCRIPTION").text
-                        if enum_description is not None:
-                            for line in textwrap.wrap(enum_description):
-                                desc_text += "                " + line + "\n"
-                desc_text += "        \"\"\"\n"
-
                 # Create original attribute for the default keyname
                 if newname == default_name:
 
                     # Special case for repeateable keywords.
                     if keyword.get("repeats") == "yes":
                         public += "        self." + newname + " = []\n"
-                        public += desc_text
+                        public += create_docstring(keyword)
                         repeated_keywords[newname] = name
                     else:
                         public += "        self." + newname + " = None\n"
-                        public += desc_text
+                        public += create_docstring(keyword)
                         keywords[newname] = name
 
                 # Create properties for aliases
@@ -217,41 +217,19 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     # Create a class attribute for all DEFAULT_KEYWORDS
     default_keyword = section.find("DEFAULT_KEYWORD")
     if default_keyword is not None:
+        attributes.append("Default_keyword")
         # Special case for repeateable default_keywords. Create a dictionary of the
         # keyword and add a function for creating them.
         name = default_keyword.find("NAME").text
         newname = validify_keyword(name)
 
-        # Write the description for the keyword
-        description = default_keyword.find("DESCRIPTION").text
-        desc_text = "        \"\"\"\n"
-        if description is not None:
-            for line in textwrap.wrap(description):
-                desc_text += "        " + line + "\n"
-        else:
-            desc_text += "\n"
-
-        # If the values are enumerated, document the possible values
-        data_type = default_keyword.find("DATA_TYPE")
-        if data_type.get("kind") == "keyword":
-            desc_text += "        AVAILABLE VALUES:\n"
-            enumerations = data_type.find("ENUMERATION")
-            for enum in enumerations.findall("ITEM"):
-                desc_text += "            " + enum.find("NAME").text + "\n"
-                enum_description = enum.find("DESCRIPTION").text
-                if enum_description is not None:
-                    for line in textwrap.wrap(enum_description):
-                        desc_text += "                " + line + "\n"
-
-        desc_text += "        \"\"\"\n"
-
         if default_keyword.get("repeats") == "yes":
             public += "        self." + newname + " = []\n"
-            public += desc_text
+            public += create_docstring(default_keyword)
             repeated_default_keywords[newname] = name
         else:
             public += "        self." + newname + " = None\n"
-            public += desc_text
+            public += create_docstring(default_keyword)
             default_keywords[newname] = name
 
     #---------------------------------------------------------------------------
