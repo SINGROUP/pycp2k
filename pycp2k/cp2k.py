@@ -368,7 +368,24 @@ class CP2K(Calculator, object):
         else:
             working_directory = self.working_directory
 
-        filename = working_directory + "/" + self.CP2K_INPUT.GLOBAL.Project_name + "-pos-1.xyz"
+        # Determine the file format
+        file_format = None
+        for print_section in self.CP2K_INPUT.MOTION.PRINT_list:
+            file_format = print_section.TRAJECTORY.Format 
+            if file_format is not None:
+                break
+
+        if file_format is None or file_format == "XYZ" or file_format == "XMOL":
+            file_suffix = ".xyz"
+        elif file_format == "PDB":
+            file_suffix = ".pdb"
+        elif file_format == "DCD":
+            file_suffix = ".dcd"
+        else:
+            print_warning("Cannot open the file format " + file_format + " directly with VMD.")
+            return
+
+        filename = working_directory + "/" + self.CP2K_INPUT.GLOBAL.Project_name + "-pos-1" + file_suffix
         command = "vmd " + filename
         # Call the subprocess. shell=True is used to access srun and
         # environment variable expansions.
