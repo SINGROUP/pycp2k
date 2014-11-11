@@ -43,10 +43,10 @@ Installation and usage on Triton (Aalto University's computing cluster):
 These instructions were made for and tested on Triton, but they should be extensible to any other computer cluster with the appropriate changes.
 
 1. Installation:
-   1. Load the modules required for installation (do not load the python module for installation: the installation will not run as the loaded python version will not find setuptools):
+   1. Load the modules required for installation. Python >= 2.7.6 should be used.
    
        ```
-       module load cp2k
+       module load triton/python/2.7.6 cp2k
        ```
        
    2. Clone this repository to somewhere in your work directory:
@@ -74,7 +74,7 @@ These instructions were made for and tested on Triton, but they should be extens
       #SBATCH --time=10:00
       #SBATCH --mem-per-cpu=500
 
-      module load cp2k python numpy ase/3.6.0rev2515
+      module load cp2k triton/python/2.7.6 numpy ase/3.6.0rev2515
       export PYTHONPATH=$PYTHONPATH:/full/path/to/pycp2k/package
       python example_si_triton.py
       ```
