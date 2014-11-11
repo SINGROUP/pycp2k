@@ -31,7 +31,7 @@ def validify_section(string):
         string = "NUM" + string
 
     if changed:
-        print "    Section " + original + " replaced with " + string
+        print "    Section {} replaced with {}".format(original, string)
     return string
 
 
@@ -56,7 +56,7 @@ def validify_keyword(string):
         string = "NUM" + string
 
     if changed:
-        print "    Keyword " + original + " replaced with " + string
+        print "    Keyword {} replaced with {}".format(original, string)
 
     string = string.capitalize()
     return string

@@ -11,7 +11,7 @@ from subprocess import call
 import re
 import numpy as np
 import os
-from ase.constraints import FixAtoms, FixBondLength
+from ase.constraints import FixAtoms
 
 
 #===============================================================================
@@ -96,14 +96,6 @@ class CP2K(Calculator, object):
         self._project_name = value
         self.CP2K_INPUT.GLOBAL.Project_name = value
 
-    def set_atoms(atoms):
-        """Reads all the supported properties from an ASE Atoms object into the
-        CP2K input.
-
-        Basically this means that all the 
-        """
-        pass
-
     def calculation_required(self, atoms=None, quantities=None):
         """Check if a calculation is required.
 
@@ -124,7 +116,7 @@ class CP2K(Calculator, object):
         available_quantities = ["energy", "forces"]
         for quantity in quantities:
             if quantity not in available_quantities:
-                print_warning("Quantity '" + quantity + "' not available.")
+                print_warning("Quantity '{}' not available.".format(quantity))
                 return True
 
         if self.old_input is None:
@@ -201,9 +193,9 @@ class CP2K(Calculator, object):
         A = cell[0, :]
         B = cell[1, :]
         C = cell[2, :]
-        subsys.CELL.A = str(A[0]) + " " + str(A[1]) + " " + str(A[2])
-        subsys.CELL.B = str(B[0]) + " " + str(B[1]) + " " + str(B[2])
-        subsys.CELL.C = str(C[0]) + " " + str(C[1]) + " " + str(C[2])
+        subsys.CELL.A = A.tolist()
+        subsys.CELL.B = B.tolist()
+        subsys.CELL.C = C.tolist()
 
         pbc = atoms.get_pbc()
         if sum(pbc) == 0:
@@ -333,7 +325,7 @@ class CP2K(Calculator, object):
         # sequence as instructed in subprocess documentation.
         command_string = " ".join(command_list)
 
-        print_message("CP2K START", "Calculation started with command " + command_string)
+        print_message("CP2K START", "Calculation started with command {}".format(command_string))
         if print_input:
             print_title("CP2K INPUT")
             print self.input
@@ -382,7 +374,7 @@ class CP2K(Calculator, object):
         elif file_format == "DCD":
             file_suffix = ".dcd"
         else:
-            print_warning("Cannot open the file format " + file_format + " directly with VMD.")
+            print_warning("Cannot open the file format {} directly with VMD.".format(file_format))
             return
 
         filename = working_directory + "/" + self.CP2K_INPUT.GLOBAL.Project_name + "-pos-1" + file_suffix
