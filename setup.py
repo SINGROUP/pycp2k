@@ -88,8 +88,9 @@ def main():
                 option_number = int(option_number)
                 if (option_number <= 0 or option_number > len(cp2k_commands)+1):
                     raise ValueError
-                if not cp2k_commands[option_number-1][1]:
-                    raise ValueError
+                if (option_number > 0 and option_number < len(cp2k_commands)+1):
+                    if not cp2k_commands[option_number-1][1]:
+                        raise ValueError
                 valid_number = True
             except ValueError:
                 print "That's not a valid integer number! Try again."
