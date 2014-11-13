@@ -112,7 +112,7 @@ def main():
     #---------------------------------------------------------------------------
     # xml chosen
     else:
-        available_versions = ["2.4"]
+        available_versions = ["2.4.0", "2.5.1"]
         print "|------------------------------------------------------------------------------|"
         print textwrap.fill("Which .xml file should be used:", width=80)
         print ""
@@ -131,7 +131,7 @@ def main():
             except ValueError:
                 print "That's not a valid integer number! Try again."
 
-        if option_number == 2:
+        if option_number == len(available_versions) + 1:
             xml_path = raw_input('Enter path to .xml file:')
             while not os.path.isfile(xml_path):
                 print "Invalid path provided. Please try again"
