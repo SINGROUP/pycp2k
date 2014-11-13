@@ -9,6 +9,12 @@ from subprocess import call
 
 #===============================================================================
 def which(program):
+    """Tests if the given executable is available in system PATH.
+
+    args:
+        program: string
+            The executable name.
+    """
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
@@ -31,16 +37,32 @@ def main():
     # Start setup
     utilities.print_title("PYCP2K INSTALLATION STARTED")
 
+    # Determine the available cp2k executables
+    cp2k_commands = [
+        ["cp2k.sopt", False],
+        ["cp2k.popt", False],
+        ["cp2k.ssmp", False],
+        ["cp2k.psmp", False]
+    ]
+    for item in cp2k_commands:
+        if which(item[0]) is not None:
+            item[1] = True
+
     #---------------------------------------------------------------------------
     # Ask user whether to use executable or xml
     print textwrap.fill("How should the input structure be created?", width=80)
-    print "\n    [1]  from CP2K executable"
-    print "    [2]  from .xml file\n"
+    options1 = ["from CP2K executable", "from .xml file"]
+    print ""
+    for i_option, option in enumerate(options1):
+        print "    [{}]  {}".format(i_option+1, option)
+    print ""
     source_valid = False
     while not source_valid:
         try:
             source = raw_input('Enter option number:')
             source = int(source)
+            if (source <= 0 or source > len(options1)):
+                raise ValueError
             source_valid = True
         except ValueError:
             print "That's not a valid integer number! Try again."
@@ -48,40 +70,40 @@ def main():
     #---------------------------------------------------------------------------
     # Executable chosen
     if source == 1:
-        # Determine the available cp2k executables
-        cp2k_commands = [["cp2k.popt", False], ["cp2k.sopt", False], ["cp2k.psmp", False]]
-        for item in cp2k_commands:
-            if which(item[0]) is not None:
-                item[1] = True
 
         # Ask user what to do
         print "|------------------------------------------------------------------------------|"
-        print textwrap.fill("Choose the CP2K executable used for creating the xml file:", width=80)
+        print textwrap.fill("Choose the CP2K executable. It will be used for creating the xml file and set as the default CP2K executable for PYCP2K. This setting can be changed by modifying config.py in the pycp2k folder, and can be dynamically overridden for each simulation with the 'cp2k_command' attribute.", width=80)
+        print ""
         for i, [name, avail] in enumerate(cp2k_commands):
             if avail:
-                print "\n    [" + str(i+1) + "] " + name
+                print "    [{}] {}".format(i+1, name)
             else:
-                print "    [X] " + name + " not available"
+                print "    [x] {} not available".format(name)
         print "    [" + str(len(cp2k_commands)+1) + "] Custom CP2K executable name\n"
         valid_number = False
         while not valid_number:
             try:
                 option_number = raw_input('Enter option number:')
                 option_number = int(option_number)
+                if (option_number <= 0 or option_number > len(cp2k_commands)+1):
+                    raise ValueError
+                if not cp2k_commands[option_number-1][1]:
+                    raise ValueError
                 valid_number = True
             except ValueError:
                 print "That's not a valid integer number! Try again."
 
         if option_number == len(cp2k_commands)+1:
-            cp2k_path = raw_input('Enter CP2K executable name:')
+            cp2k_default_command = raw_input('Enter CP2K executable name:')
         else:
-            cp2k_path = cp2k_commands[int(option_number-1)][0]
+            cp2k_default_command = cp2k_commands[int(option_number-1)][0]
 
         # Call cp2k comand with flag --xml to create the xml file of the input structure
         try:
-            call([cp2k_path, "--xml"])
+            call([cp2k_default_command, "--xml"])
         except OSError:
-            utilities.print_error("Could not call executable " + cp2k_path + " with flag --xml. Canceling installation...")
+            utilities.print_error("Could not call executable {} with flag --xml. Canceling installation...".format(cp2k_default_command))
             utilities.print_title("INSTALLATION FAILED")
             return False
         xml_path = "cp2k_input.xml"
@@ -92,14 +114,18 @@ def main():
         available_versions = ["2.4"]
         print "|------------------------------------------------------------------------------|"
         print textwrap.fill("Which .xml file should be used:", width=80)
+        print ""
         for i, version in enumerate(available_versions):
-            print "\n    [" + str(i+1) + "] cp2k_input_" + version + ".xml"
-        print "    [" + str(len(available_versions)+1) + "] Provide path to .xml file\n"
+            print "    [{}] cp2k_input_{}.xml".format(i+1, version)
+        print "    [{}] Provide path to .xml file".format(len(available_versions)+1)
+        print ""
         valid_number = False
         while not valid_number:
             try:
                 option_number = raw_input('Enter option number:')
                 option_number = int(option_number)
+                if (option_number <= 0 or option_number > len(available_versions)+1):
+                    raise ValueError
                 valid_number = True
             except ValueError:
                 print "That's not a valid integer number! Try again."
@@ -110,29 +136,32 @@ def main():
                 print "Invalid path provided. Please try again"
                 xml_path = raw_input('Enter path to .xml file:')
         else:
-            xml_path = "cp2k_input_" + available_versions[option_number - 1] + ".xml"
+            xml_path = "cp2k_input_{}.xml".format(available_versions[option_number - 1])
 
-    #---------------------------------------------------------------------------
-    # Ask for the default CP2K command
-    print "|------------------------------------------------------------------------------|"
-    print textwrap.fill("Choose the default CP2K executable. This executable is used by default for running CP2K. It can be changed by modifying config.py in the pycp2k folder, and can be dynamically overridden for each simulation with the 'cp2k_command' attribute.", width=80)
-    print ""
-    for i, [name, avail] in enumerate(cp2k_commands):
-            print "    [" + str(i+1) + "] " + name
-    print "    [" + str(len(cp2k_commands)+1) + "] Custom CP2K executable name\n"
-    valid_number = False
-    while not valid_number:
-        try:
-            option_number = raw_input('Enter option number:')
-            option_number = int(option_number)
-            valid_number = True
-        except ValueError:
-            print "That's not a valid integer number! Try again."
+        #---------------------------------------------------------------------------
+        # Ask for the default CP2K command
+        print "|------------------------------------------------------------------------------|"
+        print textwrap.fill("Choose the default CP2K executable if available. This executable is used by default for running CP2K. It can be changed by modifying config.py in the pycp2k folder, and can be dynamically overridden for each simulation with the 'cp2k_command' attribute.", width=80)
+        print ""
+        for i, [name, avail] in enumerate(cp2k_commands):
+                print "    [" + str(i+1) + "] " + name
+        print "    [{}] Custom CP2K executable name".format(len(cp2k_commands)+1)
+        print ""
+        valid_number = False
+        while not valid_number:
+            try:
+                option_number = raw_input('Enter option number:')
+                option_number = int(option_number)
+                if (option_number <= 0 or option_number > len(cp2k_commands)+1):
+                    raise ValueError
+                valid_number = True
+            except ValueError:
+                print "That's not a valid integer number! Try again."
 
-    if option_number == len(cp2k_commands)+1:
-        cp2k_default_command = raw_input('Enter CP2K executable name:')
-    else:
-        cp2k_default_command = cp2k_commands[int(option_number-1)][0]
+        if option_number == len(cp2k_commands)+1:
+            cp2k_default_command = raw_input('Enter CP2K executable name:')
+        else:
+            cp2k_default_command = cp2k_commands[int(option_number-1)][0]
 
     #---------------------------------------------------------------------------
     # Ask for the default MPI command
@@ -141,13 +170,16 @@ def main():
     print ""
     mpi_commands = ["mpirun", "srun --mpi=openmpi", "srun --mpi=pmi2"]
     for i, name in enumerate(mpi_commands):
-        print "    [" + str(i+1) + "] " + name
-    print "    [" + str(len(mpi_commands)+1) + "] Custom MPI executable name\n"
+        print "    [{}] {}".format(i+1, name)
+    print "    [{}] Custom MPI executable name".format(len(mpi_commands)+1)
+    print ""
     valid_number = False
     while not valid_number:
         try:
             option_number = raw_input('Enter option number:')
             option_number = int(option_number)
+            if (option_number <= 0 or option_number > len(mpi_commands)+1):
+                raise ValueError
             valid_number = True
         except ValueError:
             print "That's not a valid integer number! Try again."
