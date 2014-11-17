@@ -3,7 +3,7 @@ PYCP2K: a python interface to CP2K
 
 1. [Introduction](#introduction)  
 2. [Example](#example)
-3. [Installation on Linux](#linux)  
+3. [Installation on Linux Desktop](#linux)  
 4. [Installation on Triton](#triton)
 5. [Implementation Notes](#notes)
 
@@ -90,7 +90,7 @@ print calc.get_potential_energy()
 print calc.get_forces()
 ```
 <a name="linux"></a>
-3\. Installation on Linux
+3\. Installation on Linux Desktop
 --------------------------------------------------
 These installation instructions were tested on Ubuntu 14.04 x64:
 
