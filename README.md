@@ -1,11 +1,11 @@
 PYCP2K
 ==================
 
-<pre>
+```text
   / _ \ \/ / ___/ _ \|_  |/ //_/
  / ___/\  / /__/ ___/ __// ,<   
-/_/    /_/\___/_/  /____/_/|_|  
-</pre>
+/_/    /_/\___/_/  /____/_/|_|
+```
 
 A python package that provides a python interface to CP2K, an atomistic and molecular simulation software.
 
