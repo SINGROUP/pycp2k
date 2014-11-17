@@ -1,18 +1,5 @@
-PYCP2K
+PYCP2K: a python interface to CP2K
 ==================
-<pre>
-             ,-. 
-    ,     ,-.   ,-. 
-   / \   (   )-(   ) 
-   \ |  ,.>-(   )-< 
-    \|,' (   )-(   ) 
-     Y ___`-'   `-' 
-     |/__/   `-' 
-     | 
-     | 
-     |    -hrr- 
-  ___|_____________ 
-</pre>
 
 A python package that provides a python interface to CP2K, an atomistic and molecular simulation software.
 
