@@ -1,15 +1,14 @@
 PYCP2K: a python interface to CP2K
 ==================================================
 
-- - -
-1\. [Introduction](#introduction)  
-2\. [Example](#example)
-3\. [Installation on Linux](#linux)  
-4\. [Installation on Triton](#triton)
-5\. [Implementation Notes](#notes)  
-- - -
+1. [Introduction](#introduction)  
+2. [Example](#example)
+3. [Installation on Linux](#linux)  
+4. [Installation on Triton](#triton)
+5. [Implementation Notes](#notes)
 
-1\. Introduction <a name="introduction"></a>
+<a name="introduction"></a>
+1\. Introduction 
 --------------------------------------------------
 
 A python package that provides a python interface to [CP2K](http://www.cp2k.org/), an atomistic and molecular simulation software.
@@ -28,7 +27,8 @@ PYCP2K is able to use the ASE library for creating structures and loading [many 
 
 Technically the interfacing to CP2K happens simply by writing CP2K input files and reading the output files. There is no direct interface to the fortran code (i.e. F2PY not used).
 
-2\. Example <a name="example"></a>
+<a name="example"></a>
+2\. Example
 --------------------------------------------------
 An example script that calculates the energy and forces in a silicon lattice using DFT. To see a fully documented version of this example and other examples, look at the examples folder.
 ```python
@@ -89,8 +89,8 @@ calc.create_coord(SUBSYS, lattice)
 print calc.get_potential_energy()
 print calc.get_forces()
 ```
-
-3\. Installation on Linux <a name="linux"></a>
+<a name="linux"></a>
+3\. Installation on Linux
 --------------------------------------------------
 These installation instructions were tested on Ubuntu 14.04 x64:
 
@@ -116,8 +116,8 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    ```
    sudo python setup.py install
    ```
-
-4\. Installation on Triton <a name="triton"></a>
+<a name="triton"></a>
+4\. Installation on Triton
 --------------------------------------------------
 
 These instructions were made for and tested on Triton, the computing cluster at Aalto University, but they should be extensible to any other computer cluster with the appropriate changes.
@@ -166,8 +166,9 @@ These instructions were made for and tested on Triton, the computing cluster at 
       NOTE: In the batch file you specify the number of processes that are allocated for you. This doesn't automatically mean that MPI is initialized with that many processes. You must specify the number of mpi processes in the python script with calculator attribute *mpi\_n\_processes*
       
       NOTE: The nodes are constrained to xeon/xeonib because the default version of cp2k on triton will not run on opteron nodes. On xeon ivy bridge nodes you might get a warning about fabric initialization but the calculations seem to run normally.
-
-5\. Implementation Notes <a name="notes"></a>
+      
+<a name="notes"></a>
+5\. Implementation Notes
 --------------------------------------------------
 
 1. All section names are in uppercase to prevent clashes with python keywords (global, print, etc.)
