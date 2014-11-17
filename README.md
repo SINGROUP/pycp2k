@@ -23,7 +23,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    git clone https://github.com/lauri-codes/PYCP2K.git
    ```
 
-3. The correct input structure is created from the .xml file that can be created by calling the CP2K executable with flag --xml. During the setup you will have the option of creating the .xml file by using a CP2K executable on your computer, or by using a pre-existing .xml file. The .xml files may differ between CP2K versions, and if you change CP2K version at some point, you should rerun this installation. The .xml file for CP2K 2.4 is provided with this repository.
+3. The correct input structure is created from the .xml file that can be created by calling the CP2K executable with flag --xml. During the setup you will have the option of creating the .xml file by using a CP2K executable on your computer, or by using a pre-existing .xml file. The .xml files may differ between CP2K versions, and if you change CP2K version at some point, you should rerun this installation. The .xml files for CP2K 2.4.0 and 2.5.1 are provided with this repository.
 4. Install the package by running the setup script in terminal. During setup you will be asked how you want to create the input structure (using executable or existing xml file) and what should the default CP2K and MPI commands be.
    For local setup use:
 
