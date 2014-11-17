@@ -38,9 +38,15 @@ def make_message(message, width=80, spaces=0):
     wrapper = textwrap.TextWrapper(width=width-6)
     lines = wrapper.wrap(message)
     styled_message = ""
+    first = True
     for line in lines:
-        styled_message += spaces*" " + "|  " + line + (width-6-len(line))*" " + "  |\n"
-    styled_message += spaces*" " + "|" + (width-2)*"-" + "|"
+        new_line = spaces*" " + "|  " + line + (width-6-len(line))*" " + "  |"
+        if first:
+            styled_message += new_line
+            first = False
+        else:
+            styled_message += "\n" + new_line
+    styled_message += "\n" + spaces*" " + "|" + (width-2)*"-" + "|"
     return styled_message
 
 
@@ -56,6 +62,25 @@ def print_message(title, message, width=80):
     """Returns a styled warning message to be printed into console.
     """
     print make_title(title) + "\n" + make_message(message) + "\n"
+
+
+#===============================================================================
+def print_text(text, spaces=0, width=80):
+    """Styles a message to be printed into console. No borders, no footer, no
+    header.
+    """
+    wrapper = textwrap.TextWrapper(width=width-4)
+    lines = wrapper.wrap(text)
+    styled_message = ""
+    first = True
+    for line in lines:
+        new_line = spaces*" " + "  " + line
+        if first:
+            styled_message += new_line
+            first = False
+        else:
+            styled_message += "\n" + new_line
+    print(styled_message)
 
 
 #===============================================================================

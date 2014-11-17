@@ -8,11 +8,11 @@ follow."""
 class printable(object):
 
     def __getattr__(self, attr):
-        # Only called what self.attr doesn't exist
+        """Called when self.attr doesn't exist"""
         message = (
-            "The attribute {0} does not exist. Maybe you are trying to access"
-            " a repeatable item that should be first added with {0}_add() which"
-            " also returns the newly added section?"
+            "The attribute {0} does not exist. This is either a typo or you are"
+            " trying to access a repeatable item that should be first added"
+            " with {0}_add() which also returns the newly added section."
         ).format(attr)
         raise AttributeError(message)
 

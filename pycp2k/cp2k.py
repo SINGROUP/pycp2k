@@ -4,10 +4,10 @@
 """This module defines an ASE calculator interface to CP2K."""
 
 from pycp2k.parsedclasses import _CP2K_INPUT1
-from pycp2k.utilities import print_title, print_message, print_warning
+from pycp2k.utilities import print_title, print_text, print_warning, print_error
 import pycp2k.config
 from ase.calculators.interface import Calculator
-from subprocess import call
+from subprocess import call, check_output, CalledProcessError
 import re
 import numpy as np
 import os
@@ -303,7 +303,15 @@ class CP2K(Calculator, object):
     def run(self, print_input=False, print_output=False):
         """Runs the input script."""
 
+        print_title("PYCP2K RUN STARTED")
+
+        # Write input file and possibly show it
+        print_text(">> Creating CP2K input file...")
         self.write_input_file()
+        if print_input:
+            print_text(">> CP2K input file:")
+            print self.input
+
         command_list = []
 
         # MPI command and flags
@@ -325,32 +333,50 @@ class CP2K(Calculator, object):
         # sequence as instructed in subprocess documentation.
         command_string = " ".join(command_list)
 
-        print_message("CP2K START", "Calculation started with command {}".format(command_string))
-        if print_input:
-            print_title("CP2K INPUT")
-            print self.input
-
         # Run in the output directory by default, can be changed with working_directory
         if self.working_directory is None:
             working_directory = os.path.dirname(self.output_path)
         else:
             working_directory = self.working_directory
 
+        # Perform syntax check
+        print_text(">> Performing syntax check on input file...")
+        command_for_syntax_check = " ".join([self.cp2k_command, "-i " + str(self.get_input_path()), "--check"])
+        syntax_result = check_output(command_for_syntax_check, shell=True, cwd=working_directory)
+        if syntax_result[0:7] != "SUCCESS":
+            print_error("Syntax error in the input file. See the following output for further details.")
+            print syntax_result
+            raise Exception
+
         # Call the subprocess. shell=True is used to access srun and
         # environment variable expansions.
-        call(command_string, shell=True, cwd=working_directory)
+        print_text(">> Running CP2K:")
+        print_text("   -CP2K command: {}".format(os.path.basename(self.cp2k_command)))
+        if self.mpi_on:
+            print_text("   -MPI command: {}".format(self.mpi_command))
+            print_text("   -Processes: {}".format(self.mpi_n_processes))
+        try:
+            check_output(command_string, shell=True, cwd=working_directory)
+        except CalledProcessError:
+            error_output_path = self.get_output_path()
+            print_error("Error occured during CP2K calculation. See the output from {} for further details.".format(error_output_path))
+            raise
+
+        print_text(">> CP2K calculation finished succesfully!")
 
         # Open the output file
         with open(self.get_output_path(), 'r') as output_file:
             self.output = output_file.read()
 
         if print_output:
-            print_title("CP2K OUTPUT")
+            print_text(">> CP2K output file:")
             print self.output
+
+        print_title("PYCP2K RUN FINISHED")
 
     def vmd_view_trajectory(self):
         """View the MD trajectory with VMD.
-        
+
         Opens a blocking vmd window and loads the .xyz file created from MD
         simulation.
         """
@@ -363,7 +389,7 @@ class CP2K(Calculator, object):
         # Determine the file format
         file_format = None
         for print_section in self.CP2K_INPUT.MOTION.PRINT_list:
-            file_format = print_section.TRAJECTORY.Format 
+            file_format = print_section.TRAJECTORY.Format
             if file_format is not None:
                 break
 
