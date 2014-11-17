@@ -1,6 +1,16 @@
 PYCP2K
 ==================
 
+```
+ ____    __    __  ____     ____       ___    __  __     
+/\  _`\ /\ \  /\ \/\  _`\  /\  _`\   /'___`\ /\ \/\ \    
+\ \ \L\ \ `\`\\/'/\ \ \/\_\\ \ \L\ \/\_\ /\ \\ \ \/'/'   
+ \ \ ,__/`\ `\ /'  \ \ \/_/_\ \ ,__/\/_/// /__\ \ , <    
+  \ \ \/   `\ \ \   \ \ \L\ \\ \ \/    // /_\ \\ \ \\`\  
+   \ \_\     \ \_\   \ \____/ \ \_\   /\______/ \ \_\ \_\
+    \/_/      \/_/    \/___/   \/_/   \/_____/   \/_/\/_/
+```
+
 A python package that provides a python interface to CP2K, an atomistic and molecular simulation software.
 
 PYCP2K allows the user to create and run entire CP2K simulation with python scripts only. The simulation parameters can be dynamically created and altered thanks to an *object tree* that replaces the traditional CP2K input scripts.
