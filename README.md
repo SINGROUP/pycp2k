@@ -53,7 +53,7 @@ calc.mpi_n_processes = 2
 #==================== Define shortcuts for easy access =========================
 CP2K_INPUT = calc.CP2K_INPUT
 GLOBAL = CP2K_INPUT.GLOBAL
-FORCE_EVAL = CP2K_INPUT.FORCE_EVAL_add()
+FORCE_EVAL = CP2K_INPUT.FORCE_EVAL_add() # Repeatable items have to be first created
 SUBSYS = FORCE_EVAL.SUBSYS
 DFT = FORCE_EVAL.DFT
 SCF = DFT.SCF
