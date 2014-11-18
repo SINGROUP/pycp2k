@@ -24,12 +24,14 @@ class CP2K(Calculator, object):
 
     The advantages of doing CP2K calculations with PYCP2K are:
 
-        -Script complex runs with python
-        -Structure creation with ASE
-        -ASE input/output
-        -Automatic syntax correctness for the input file
-        -Code completion if provided by your python IDE
-        -Quick access to documentation if provided by your IDE
+        -Use python data structures and algorithms to create and modify the
+         input
+        -Create and run CP2K simulations with one python script.
+        -Structure creation and loading with ASE
+        -Autocompletion if provided by your IDE
+        -Built-in documentation for all keywords and sections.
+        -Use additional python libraries (numpy, scipy, matplotlib, etc.) to
+         also analyze the results - all with python.
 
     Attributes:
         CP2K_INPUT: pycp2k.parsedclasses._CP2K_INPUT1

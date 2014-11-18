@@ -58,7 +58,6 @@ SCF.MIXING.Alpha = 0.4
 SCF.MIXING.Nbroyden = 8
 
 KIND = SUBSYS.KIND_add("Si")
-KIND.Element = "Si"
 KIND.Basis_set = "DZVP-GTH-PADE"
 KIND.Potential = "GTH-PADE-q4"
 

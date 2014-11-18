@@ -86,7 +86,6 @@ SCF.MIXING.Nbroyden = 8
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
 
 KIND = SUBSYS.KIND_add("Si")  # Section_parameters can be provided as argument.
-KIND.Element = "Si"
 KIND.Basis_set = "DZVP-GTH-PADE"
 KIND.Potential = "GTH-PADE-q4"
 
