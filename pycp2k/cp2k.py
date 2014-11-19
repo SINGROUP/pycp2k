@@ -12,6 +12,7 @@ import re
 import numpy as np
 import os
 from ase.constraints import FixAtoms
+import time
 
 
 #===============================================================================
@@ -357,14 +358,19 @@ class CP2K(Calculator, object):
         if self.mpi_on:
             print_text("   -MPI command: {}".format(self.mpi_command))
             print_text("   -Processes: {}".format(self.mpi_n_processes))
+        start = time.time()
         try:
             check_output(command_string, shell=True, cwd=working_directory)
         except CalledProcessError:
             error_output_path = self.get_output_path()
             print_error("Error occured during CP2K calculation. See the output from {} for further details.".format(error_output_path))
             raise
-
+        end = time.time()
+        elapsed = end - start
+        m, s = divmod(elapsed, 60)
+        h, m = divmod(m, 60)
         print_text(">> CP2K calculation finished succesfully!")
+        print_text(">> Elapsed time: {:.0f}h:{:.0f}m:{:.0f}s".format(h, m, s))
 
         # Open the output file
         with open(self.get_output_path(), 'r') as output_file:
