@@ -10,9 +10,11 @@ class printable(object):
     def __getattr__(self, attr):
         """Called when self.attr doesn't exist"""
         message = (
-            "The attribute {0} does not exist. This is either a typo or you are"
-            " trying to access a repeatable item that should be first added"
-            " with {0}_add() which also returns the newly added section."
+            "The attribute {0} does not exist. This is either a typo (remember"
+            " that section names should be in uppercase, and keywords should be"
+            " capitalized) or you are trying to access a repeatable item that"
+            " should be first added with {0}_add() which returns the newly"
+            " added object for that section."
         ).format(attr)
         raise AttributeError(message)
 
@@ -100,7 +102,9 @@ class printable(object):
             if typos_found:
                 raise Exception((
                     "Nonexisting keyword '{}' defined in CP2K input tree"
-                    " section '{}'. This might be a typo."
+                    " section '{}'. This might be a typo (remember that section"
+                    " names should be in uppercase, and keywords should be"
+                    " capitalized)."
                 ).format(attribute, self._name))
 
     def print_input(self, level):
