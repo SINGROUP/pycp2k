@@ -19,8 +19,8 @@ The benefits of using PYCP2K over using the traditional CP2K input files:
 - Use python data structures and algorithms to create and modify the input
 - Create and run CP2K simulations with one python script.
 - Structure creation and loading with ASE
-- Autocompletion if provided by your IDE
-- Built-in documentation for all keywords and sections. 
+- Autocompletion if provided by your IDE (tested with [Spyder](https://code.google.com/p/spyderlib/))
+- Built-in documentation for all keywords and sections (with [Spyder](https://code.google.com/p/spyderlib/) you can access documentation by control-clicking the variable names). 
 - Use additional python libraries (numpy, scipy, matplotlib, etc.) to also analyze the results - all with python.
 
 PYCP2K is able to use the ASE library for creating structures and loading [many different atomic structure files](https://wiki.fysik.dtu.dk/ase/ase/io.html). PYCP2K also is an ASE compatible atomic structure calculator. If you are not familiar with ASE, do not despair: you can yourself decide how much you want to utilize the functionality provided by ASE.

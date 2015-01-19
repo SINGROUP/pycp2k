@@ -279,8 +279,8 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                       "        return new_section\n\n")
 
     # Write a function for printing original CP2K input files
-    functions += ("    def print_input(self, level):\n"
-                  "        return printable.print_input(self, level)\n")
+    functions += ("    def _print_input(self, level):\n"
+                  "        return printable._print_input(self, level)\n")
 
     #---------------------------------------------------------------------------
     # The class names are not unique. Use numbering to identify classes.

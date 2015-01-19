@@ -18,7 +18,16 @@ class printable(object):
         ).format(attr)
         raise AttributeError(message)
 
-    def parse_default_keyword(self, item, level):
+    def _format_variable(self, item):
+        # The boolean values are reformatted
+        if isinstance(item, bool):
+            if item:
+                item = "TRUE"
+            else:
+                item = "FALSE"
+        return str(item)
+
+    def _parse_default_keyword(self, item, level):
         """Parses default keywords into sensible input sections."""
         if type(item) is list:
             output = (level + 1) * "  "
@@ -29,9 +38,9 @@ class printable(object):
             output += "\n"
             return output
         else:
-            return (level + 1) * "  " + str(item) + "\n"
+            return (level + 1) * "  " + self._format_variable(item) + "\n"
 
-    def parse_repeatable_default_keyword(self, item, level):
+    def _parse_repeatable_default_keyword(self, item, level):
         """Parses repeatable default keywords into sensible input sections."""
         if type(item) is list:
             output = ""
@@ -43,13 +52,13 @@ class printable(object):
                         if j != len(value)-1:
                             output += " "
                 else:
-                    output += str(value)
+                    output += self._format_variable(value)
                 output += "\n"
             return output
         else:
-            return (level + 1) * "  " + str(item) + "\n"
+            return (level + 1) * "  " + self._format_variable(item) + "\n"
 
-    def parse_keyword(self, item, name, level):
+    def _parse_keyword(self, item, name, level):
         """Parses non-repeatable keywords into sensible input sections."""
         if type(item) is list:
             output = (level + 1) * "  " + name
@@ -62,9 +71,9 @@ class printable(object):
             output += "\n"
             return output
         else:
-            return (level + 1) * "  " + name + " " + str(item) + "\n"
+            return (level + 1) * "  " + name + " " + self._format_variable(item) + "\n"
 
-    def parse_repeatable_keyword(self, item, name, level):
+    def _parse_repeatable_keyword(self, item, name, level):
         """Parses repeatable keywords into sensible input sections."""
         if type(item) is list:
             output = ""
@@ -78,9 +87,9 @@ class printable(object):
                 output += "\n"
             return output
         else:
-            return (level + 1) * "  " + name + " " + str(item) + "\n"
+            return (level + 1) * "  " + name + " " + self._format_variable(item) + "\n"
 
-    def check_typos(self):
+    def _check_typos(self):
         for attribute in self.__dict__.iterkeys():
             typos_found = True
             if attribute in self._keywords.iterkeys():
@@ -107,10 +116,10 @@ class printable(object):
                     " capitalized)."
                 ).format(attribute, self._name))
 
-    def print_input(self, level):
+    def _print_input(self, level):
 
         # Check if any undefined items have been created. These are usually typos.
-        self.check_typos()
+        self._check_typos()
 
         inp = ""
         # Non-repeatable default keywords
@@ -118,7 +127,7 @@ class printable(object):
             value = self.__dict__[attname]
             if value is not None:
                 if not (type(value) is list and not value):
-                    parsed = self.parse_default_keyword(value, level)
+                    parsed = self._parse_default_keyword(value, level)
                     inp += parsed
 
         # Repeatable default keywords
@@ -126,7 +135,7 @@ class printable(object):
             keyword = self.__dict__[attname]
             if keyword is not None:
                 if not (type(keyword) is list and not keyword):
-                    parsed = self.parse_repeatable_default_keyword(keyword, level)
+                    parsed = self._parse_repeatable_default_keyword(keyword, level)
                     inp += parsed
 
         # Non-repeatable keywords
@@ -134,7 +143,7 @@ class printable(object):
             value = self.__dict__[attname]
             if value is not None:
                 if not (type(value) is list and not value):
-                    parsed = self.parse_keyword(value, realname, level)
+                    parsed = self._parse_keyword(value, realname, level)
                     inp += parsed
 
         # Repeatable keywords
@@ -142,13 +151,13 @@ class printable(object):
             keyword = self.__dict__[attname]
             if keyword is not None:
                 if not (type(keyword) is list and not keyword):
-                    parsed = self.parse_repeatable_keyword(keyword, realname, level)
+                    parsed = self._parse_repeatable_keyword(keyword, realname, level)
                     inp += parsed
 
         # Non-repeatable subsections
         for attname, realname in self._subsections.iteritems():
             value = self.__dict__[attname]
-            substring = value.print_input(level + 1)
+            substring = value._print_input(level + 1)
             if substring != "":
                 inp += substring + "\n"
 
@@ -156,7 +165,7 @@ class printable(object):
         for attname, realname in self._repeated_subsections.iteritems():
             for subsection in self.__dict__[attname + "_list"]:
                 if subsection is not None:
-                    substring = subsection.print_input(level + 1)
+                    substring = subsection._print_input(level + 1)
                     if substring != "":
                         inp += substring + "\n"
 
@@ -167,7 +176,7 @@ class printable(object):
             inp_header = level * "  " + "&" + self._name
             if hasattr(self, "Section_parameters"):
                 if self.Section_parameters is not None:
-                    parsed = self.parse_default_keyword(self.Section_parameters, -1)
+                    parsed = self._parse_default_keyword(self.Section_parameters, -1)
                     inp_header += " " + parsed
                     has_section_parameter = True
             if not has_section_parameter:

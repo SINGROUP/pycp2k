@@ -112,7 +112,7 @@ def main():
     #---------------------------------------------------------------------------
     # xml chosen
     else:
-        available_versions = ["2.4.0", "2.5.1"]
+        available_versions = ["2.4.0", "2.5.1", "2.6.0"]
         print "|------------------------------------------------------------------------------|"
         print textwrap.fill("Which .xml file should be used:", width=80)
         print ""

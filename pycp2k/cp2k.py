@@ -125,7 +125,7 @@ class CP2K(Calculator, object):
         if self.old_input is None:
             return True
         else:
-            new_input = self.CP2K_INPUT.print_input(-1)
+            new_input = self.CP2K_INPUT._print_input(-1)
             return new_input != self.old_input
 
     def get_forces(self, atoms=None):
@@ -283,7 +283,7 @@ class CP2K(Calculator, object):
         defined in CP2K_INPUT.
         """
         self.old_input = self.new_input
-        self.new_input = self.CP2K_INPUT.print_input(-1)
+        self.new_input = self.CP2K_INPUT._print_input(-1)
 
         # Write the file
         with open(self.get_input_path(), 'w') as input_file:
