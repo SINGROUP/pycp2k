@@ -316,6 +316,11 @@ def main(xml_path):
     utilities.print_subtitle("CREATING INPUT STRUCTURE...")
     tree = cElementTree.parse(xml_path)
     root = tree.getroot()
+
+    # Extract the cp2k version and revision
+    version = root.find("CP2K_VERSION").text
+    revision = root.find("COMPILE_REVISION").text
+
     module_header = (
         "#! /usr/bin/env python\n"
         "# -*- coding: utf-8 -*-\n\n"
@@ -336,7 +341,7 @@ def main(xml_path):
             file.write(class_body_header.encode('utf8'))
             file.write(class_body.encode('utf8'))
 
-    return True
+    return (version, revision)
 
 # Run main function by default
 if __name__ == "__main__":

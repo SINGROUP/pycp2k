@@ -308,6 +308,27 @@ class CP2K(Calculator, object):
 
         print_title("PYCP2K RUN STARTED")
 
+        # Run in the output directory by default, can be changed with working_directory
+        if self.working_directory is None:
+            working_directory = os.path.dirname(self.output_path)
+        else:
+            working_directory = self.working_directory
+
+        # Check that the cp2k version is correct
+        print_text(">> CP2K version check...")
+        command_for_version_check = " ".join([self.cp2k_command, "-v "])
+        version_result = check_output(command_for_version_check, shell=True, cwd=working_directory)
+        result_lines = version_result.splitlines()
+        run_version = result_lines[0].rsplit(None, 1)[-1]
+        run_revision = result_lines[1].rsplit(None, 1)[-1]
+        build_version = pycp2k.config.build_version
+        build_revision = pycp2k.config.build_revision
+
+        if run_version != build_version:
+            print_warning("The CP2K version does not match the version for which PYCP2K was configured. This will affect the availability of keywords and sections in the input tree!")
+        elif run_revision != build_revision:
+            print_warning("The CP2K revision does not match the version for which PYCP2K was configured. This will affect the availability of keywords and sections in the input tree!")
+
         # Write input file and possibly show it
         print_text(">> Creating CP2K input file...")
         self.write_input_file()
@@ -336,12 +357,6 @@ class CP2K(Calculator, object):
         # sequence as instructed in subprocess documentation.
         command_string = " ".join(command_list)
 
-        # Run in the output directory by default, can be changed with working_directory
-        if self.working_directory is None:
-            working_directory = os.path.dirname(self.output_path)
-        else:
-            working_directory = self.working_directory
-
         # Perform syntax check
         print_text(">> Performing syntax check on input file...")
         command_for_syntax_check = " ".join([self.cp2k_command, "-i " + str(self.get_input_path()), "--check"])
@@ -354,6 +369,8 @@ class CP2K(Calculator, object):
         # Call the subprocess. shell=True is used to access srun and
         # environment variable expansions.
         print_text(">> Running CP2K:")
+        print_text("   -CP2K version: {}".format(run_version))
+        print_text("   -CP2K revision: {}".format(run_revision))
         print_text("   -CP2K command: {}".format(os.path.basename(self.cp2k_command)))
         if self.mpi_on:
             print_text("   -MPI command: {}".format(self.mpi_command))

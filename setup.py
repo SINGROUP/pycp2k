@@ -5,6 +5,14 @@ import textwrap
 import os
 import os.path
 from subprocess import call
+import readline
+import glob
+
+
+#===============================================================================
+def complete(text, state):
+    """For filepath autocompletion."""
+    return (glob.glob(text+'*')+[None])[state]
 
 
 #===============================================================================
@@ -36,6 +44,11 @@ def which(program):
 def main():
     # Start setup
     utilities.print_title("PYCP2K INSTALLATION STARTED")
+
+    # Setup filepath autocompleter
+    readline.set_completer_delims(' \t\n;')
+    readline.parse_and_bind("tab: complete")
+    readline.set_completer(complete)
 
     # Determine the available cp2k executables
     cp2k_commands = [
@@ -191,32 +204,32 @@ def main():
         mpi_default_command = mpi_commands[int(option_number-1)]
 
     #---------------------------------------------------------------------------
+    # Call input parser with the xml file
+    (version, revision) = inputparser.main(xml_path)
+    utilities.print_title("INSTALLING PACKAGE")
+
+    setup(name='pycp2k',
+          version='0.1',
+          description='A python interface to CP2K',
+          url='https://github.com/lauri-codes/pycp2k.git',
+          author='Lauri Himanen',
+          author_email='lauri.himanen@gmail.com',
+          license='GPL3',
+          packages=['pycp2k'],
+          zip_safe=False)
+
+    #---------------------------------------------------------------------------
     # Write the config file
     with open('pycp2k/config.py', 'w') as config_file:
         contents = ("#! /usr/bin/env python\n"
                     "# -*- coding: utf-8 -*-\n\n"
                     "cp2k_default_command = \"" + cp2k_default_command + "\"\n"
-                    "mpi_default_command = \"" + mpi_default_command + "\"")
+                    "mpi_default_command = \"" + mpi_default_command + "\"\n"
+                    "build_version = \"" + version.rsplit(None, 1)[-1] + "\"\n"
+                    "build_revision = \"" + revision.rsplit(None, 1)[-1] + "\"")
         config_file.write(contents)
 
-    #---------------------------------------------------------------------------
-    # Call input parser with the xml file
-    if inputparser.main(xml_path):
-        utilities.print_title("INSTALLING PACKAGE")
-
-        setup(name='pycp2k',
-              version='0.1',
-              description='A python interface to CP2K',
-              url='https://github.com/lauri-codes/pycp2k.git',
-              author='Lauri Himanen',
-              author_email='lauri.himanen@gmail.com',
-              license='GPL3',
-              packages=['pycp2k'],
-              zip_safe=False)
-
-        utilities.print_title("INSTALLATION COMPLETED SUCCESFULLY")
-    else:
-        utilities.print_title("INSTALLATION FAILED")
+    utilities.print_title("INSTALLATION COMPLETED SUCCESFULLY")
 
 # Run main function by default
 if __name__ == "__main__":
