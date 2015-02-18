@@ -5,7 +5,7 @@
 
 from pycp2k.parsedclasses import _CP2K_INPUT1
 from pycp2k.utilities import print_title, print_text, print_warning, print_error
-from pycp2k import config
+import config
 from ase.calculators.interface import Calculator
 from subprocess import call, check_output, CalledProcessError
 import re
