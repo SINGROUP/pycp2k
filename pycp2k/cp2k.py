@@ -5,7 +5,7 @@
 
 from pycp2k.parsedclasses import _CP2K_INPUT1
 from pycp2k.utilities import print_title, print_text, print_warning, print_error
-import config
+import pycp2k.config
 from ase.calculators.interface import Calculator
 from subprocess import call, check_output, CalledProcessError
 import re
@@ -76,12 +76,12 @@ class CP2K(Calculator, object):
         self.output_path = output_path
         self.working_directory = None
         self._project_name = None
-        self.cp2k_command = config.cp2k_default_command
+        self.cp2k_command = pycp2k.config.cp2k_default_command
         self.cp2k_flags = []
         self.mpi_on = True
         self.mpi_flags = []
         self.mpi_n_processes = None
-        self.mpi_command = config.mpi_default_command
+        self.mpi_command = pycp2k.config.mpi_default_command
         self.old_input = None
         self.new_input = None
         self.output = None
@@ -321,8 +321,8 @@ class CP2K(Calculator, object):
         result_lines = version_result.splitlines()
         run_version = result_lines[0].rsplit(None, 1)[-1]
         run_revision = result_lines[1].rsplit(None, 1)[-1]
-        build_version = config.build_version
-        build_revision = config.build_revision
+        build_version = pycp2k.config.build_version
+        build_revision = pycp2k.config.build_revision
 
         if run_version != build_version:
             print_warning("The CP2K version does not match the version for which PYCP2K was configured. This will affect the availability of keywords and sections in the input tree!")

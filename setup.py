@@ -208,16 +208,6 @@ def main():
     (version, revision) = inputparser.main(xml_path)
     utilities.print_title("INSTALLING PACKAGE")
 
-    setup(name='pycp2k',
-          version='0.1',
-          description='A python interface to CP2K',
-          url='https://github.com/lauri-codes/pycp2k.git',
-          author='Lauri Himanen',
-          author_email='lauri.himanen@gmail.com',
-          license='GPL3',
-          packages=['pycp2k'],
-          zip_safe=False)
-
     #---------------------------------------------------------------------------
     # Write the config file
     with open('pycp2k/config.py', 'w') as config_file:
@@ -228,6 +218,17 @@ def main():
                     "build_version = \"" + version.rsplit(None, 1)[-1] + "\"\n"
                     "build_revision = \"" + revision.rsplit(None, 1)[-1] + "\"")
         config_file.write(contents)
+
+    # Start package setup
+    setup(name='pycp2k',
+          version='0.1',
+          description='A python interface to CP2K',
+          url='https://github.com/SINGROUP/pycp2k.git',
+          author='Lauri Himanen',
+          author_email='lauri.himanen@gmail.com',
+          license='GPL3',
+          packages=['pycp2k'],
+          zip_safe=False)
 
     utilities.print_title("INSTALLATION COMPLETED SUCCESFULLY")
 
