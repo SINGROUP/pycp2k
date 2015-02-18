@@ -72,7 +72,7 @@ def main():
     source_valid = False
     while not source_valid:
         try:
-            source = raw_input('Enter option number:')
+            source = raw_input('Enter option number: ')
             source = int(source)
             if (source <= 0 or source > len(options1)):
                 raise ValueError
@@ -97,7 +97,7 @@ def main():
         valid_number = False
         while not valid_number:
             try:
-                option_number = raw_input('Enter option number:')
+                option_number = raw_input('Enter option number: ')
                 option_number = int(option_number)
                 if (option_number <= 0 or option_number > len(cp2k_commands)+1):
                     raise ValueError
@@ -109,7 +109,7 @@ def main():
                 print "That's not a valid integer number! Try again."
 
         if option_number == len(cp2k_commands)+1:
-            cp2k_default_command = raw_input('Enter CP2K executable name:')
+            cp2k_default_command = raw_input('Enter CP2K executable name: ')
         else:
             cp2k_default_command = cp2k_commands[int(option_number-1)][0]
 
@@ -136,7 +136,7 @@ def main():
         valid_number = False
         while not valid_number:
             try:
-                option_number = raw_input('Enter option number:')
+                option_number = raw_input('Enter option number: ')
                 option_number = int(option_number)
                 if (option_number <= 0 or option_number > len(available_versions)+1):
                     raise ValueError
@@ -145,7 +145,7 @@ def main():
                 print "That's not a valid integer number! Try again."
 
         if option_number == len(available_versions) + 1:
-            xml_path = raw_input('Enter path to .xml file:')
+            xml_path = raw_input('Enter path to .xml file: ')
             while not os.path.isfile(xml_path):
                 print "Invalid path provided. Please try again"
                 xml_path = raw_input('Enter path to .xml file:')
@@ -173,7 +173,7 @@ def main():
                 print "That's not a valid integer number! Try again."
 
         if option_number == len(cp2k_commands)+1:
-            cp2k_default_command = raw_input('Enter CP2K executable name:')
+            cp2k_default_command = raw_input('Enter CP2K executable name: ')
         else:
             cp2k_default_command = cp2k_commands[int(option_number-1)][0]
 
@@ -190,7 +190,7 @@ def main():
     valid_number = False
     while not valid_number:
         try:
-            option_number = raw_input('Enter option number:')
+            option_number = raw_input('Enter option number: ')
             option_number = int(option_number)
             if (option_number <= 0 or option_number > len(mpi_commands)+1):
                 raise ValueError
@@ -199,7 +199,7 @@ def main():
             print "That's not a valid integer number! Try again."
 
     if option_number == len(mpi_commands)+1:
-        mpi_default_command = raw_input('Enter MPI executable name:')
+        mpi_default_command = raw_input('Enter MPI executable name: ')
     else:
         mpi_default_command = mpi_commands[int(option_number-1)]
 
