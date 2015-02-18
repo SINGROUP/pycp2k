@@ -100,7 +100,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 2. Pull this repository to any location on your computer:
 
    ```
-   git clone git@github.com:lauri-codes/pycp2k.git
+   git clone https://github.com/SINGROUP/pycp2k.git
    ```
 
 3. The correct input structure is created from the .xml file that can be created by calling the CP2K executable with flag --xml. During the setup you will have the option of creating the .xml file by using a CP2K executable on your computer, or by using a pre-existing .xml file. The .xml files may differ between CP2K versions, and if you change CP2K version at some point, you should rerun this installation. The .xml files for CP2K 2.4.0 and 2.5.1 are provided with this repository.
@@ -133,7 +133,7 @@ These instructions were made for and tested on Triton, the computing cluster at 
    2. Clone this repository to somewhere in your work directory:
    
       ```
-      git clone git@github.com:lauri-codes/pycp2k.git
+      git clone https://github.com/SINGROUP/pycp2k.git
       ```
       
    3. Install the package locally. If you loaded the cp2k module you should be able to create the input structure from the cp2k executable. When the setup asks for default MPI executable provide an appropriate *srun* command.
