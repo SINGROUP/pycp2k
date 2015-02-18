@@ -124,10 +124,15 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 These instructions were made for and tested on Triton, the computing cluster at Aalto University, but they should be extensible to any other computer cluster with the appropriate changes.
 
 1. Installation:
-   1. Load the modules required for installation. Python >= 2.7.6 should be used.
+   1. Load the modules required for installation. Python >= 2.7.6 should be used. If you plan on using the default CP2K version on triton, you should load the following:
    
        ```
        module load triton/python/2.7.6 cp2k
+       ```
+   If on the other hand you plan on using your custom compiled version, remember to load the needed modules for running the CP2K executable during the setup (the CP2K executable is run during setup with the -xml flag to produce the input structure). E.g. for CP2K compiled with mkl library you should use:
+   
+       ```
+       module load triton/python/2.7.6 mkl/2013.3.163
        ```
        
    2. Clone this repository to somewhere in your work directory:
