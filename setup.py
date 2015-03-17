@@ -215,7 +215,7 @@ def main():
                     "# -*- coding: utf-8 -*-\n\n"
                     "cp2k_default_command = \"" + cp2k_default_command + "\"\n"
                     "mpi_default_command = \"" + mpi_default_command + "\"\n"
-                    "build_version = \"" + version.rsplit(None, 1)[-1] + "\"\n"
+                    "build_version = \"" + version.rsplit(None, 1)[2] + "\"\n"
                     "build_revision = \"" + revision.rsplit(None, 1)[-1] + "\"")
         config_file.write(contents)
 
