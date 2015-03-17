@@ -319,8 +319,8 @@ class CP2K(Calculator, object):
         command_for_version_check = " ".join([self.cp2k_command, "-v "])
         version_result = check_output(command_for_version_check, shell=True, cwd=working_directory)
         result_lines = version_result.splitlines()
-        run_version = result_lines[0].rsplit(None, 1)[2]
-        run_revision = result_lines[1].rsplit(None, 1)[-1]
+        run_version = result_lines[0].split()[2]
+        run_revision = result_lines[1].split()[-1]
         build_version = pycp2k.config.build_version
         build_revision = pycp2k.config.build_revision
 
