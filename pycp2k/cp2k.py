@@ -282,12 +282,12 @@ class CP2K(Calculator, object):
         """Creates an input file for CP2K executable from the object tree
         defined in CP2K_INPUT.
         """
-        self.old_input = self.new_input
-        self.new_input = self.CP2K_INPUT._print_input(-1)
+        #self.old_input = self.new_input
+        input_contents = self.CP2K_INPUT._print_input(-1)
 
         # Write the file
         with open(self.get_input_path(), 'w') as input_file:
-            input_file.write(self.new_input)
+            input_file.write(input_contents)
 
     def get_input_path(self):
         """Determine input file path."""
@@ -396,6 +396,9 @@ class CP2K(Calculator, object):
         if print_output:
             print_text(">> CP2K output file:")
             print self.output
+
+        # Save this input to old_input
+        self.old_input = self.CP2K_INPUT._print_input(-1)
 
         print_title("PYCP2K RUN FINISHED")
 
