@@ -18,6 +18,7 @@ PYCP2K allows the user to create and run entire CP2K simulations with python scr
 The benefits of using PYCP2K over using the traditional CP2K input files:
 - Use python data structures and algorithms to create and modify the input
 - Create and run CP2K simulations with one python script.
+- Modular simulation setup by e.g. using functions to create parts of the input
 - Structure creation and loading with ASE
 - Autocompletion if provided by your IDE (tested with [Spyder](https://code.google.com/p/spyderlib/))
 - Built-in documentation for all keywords and sections (with [Spyder](https://code.google.com/p/spyderlib/) you can access documentation by control-clicking the variable names). 
