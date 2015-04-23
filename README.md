@@ -19,12 +19,12 @@ The benefits of using PYCP2K over using the traditional CP2K input files:
 - Use python data structures and algorithms to create and modify the input
 - Create and run CP2K simulations with one python script.
 - Modular simulation setup by e.g. using functions to create parts of the input
-- Structure creation and loading with ASE
+- Structure creation and loading with [ASE](https://wiki.fysik.dtu.dk/ase/)
 - Autocompletion if provided by your IDE (tested with [Spyder](https://code.google.com/p/spyderlib/))
 - Built-in documentation for all keywords and sections (with [Spyder](https://code.google.com/p/spyderlib/) you can access documentation by control-clicking the variable names). 
 - Use additional python libraries (numpy, scipy, matplotlib, etc.) to also analyze the results - all with python.
 
-PYCP2K is able to use the ASE library for creating structures and loading [many different atomic structure files](https://wiki.fysik.dtu.dk/ase/ase/io.html). PYCP2K also is an ASE compatible atomic structure calculator. If you are not familiar with ASE, do not despair: you can yourself decide how much you want to utilize the functionality provided by ASE.
+PYCP2K is able to use the ASE library for creating structures and loading [many different atomic structure files](https://wiki.fysik.dtu.dk/ase/ase/io.html).
 
 Technically the interfacing to CP2K happens simply by writing CP2K input files and reading the output files. There is no direct interface to the fortran code (i.e. F2PY not used).
 
@@ -94,9 +94,8 @@ calc.run()
 --------------------------------------------------
 These installation instructions were tested on Ubuntu 14.04 x64:
 
-1. This package depends on the numpy and the ASE package. Please install them first.
+1. This package depends on the numpy package. Please install it first.
    1. [Full SciPy stack](http://www.scipy.org/install.html)
-   2. [ASE](https://wiki.fysik.dtu.dk/ase/)
 2. Pull this repository to any location on your computer:
 
    ```
