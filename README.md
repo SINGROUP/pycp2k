@@ -85,9 +85,8 @@ KIND.Potential = "GTH-PADE-q4"
 calc.create_cell(SUBSYS, lattice)
 calc.create_coord(SUBSYS, lattice)
 
-#======================= Calculate energy and forces ============================
-print calc.get_potential_energy()
-print calc.get_forces()
+#======================= Run the simulation ============================
+calc.run()
 ```
 <a name="linux"></a>
 3\. Installation on Linux Desktop
