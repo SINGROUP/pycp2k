@@ -6,17 +6,17 @@
 from pycp2k.parsedclasses import _CP2K_INPUT1
 from pycp2k.utilities import print_title, print_text, print_warning, print_error
 import pycp2k.config
-from ase.calculators.interface import Calculator
+#from ase.calculators.interface import Calculator
 from subprocess import call, check_output, CalledProcessError
 import re
 import numpy as np
 import os
-from ase.constraints import FixAtoms
+#from ase.constraints import FixAtoms
 import time
 
 
 #===============================================================================
-class CP2K(Calculator, object):
+class CP2K(object):
     """Class for creating and running CP2K calculations.
 
     This is the main class of the pycp2k package. You use it to create an input
@@ -129,9 +129,9 @@ class CP2K(Calculator, object):
             return new_input != self.old_input
 
     def get_forces(self, atoms=None):
-        """Return the forces.
+        """Return the latest forces from the output file.
 
-        Returns a numpy array of 3D forces for each atom in the same order in
+        Returns a numpy array of 3D forces from the output file for each atom in the same order in
         which atoms have been defined.
         """
         if self.calculation_required(quantities=["forces"]):
@@ -142,7 +142,8 @@ class CP2K(Calculator, object):
             if len(force_matches) > 1:
                 print_warning("More than one 'ATOMIC FORCES' entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
         else:
-            raise Exception("'ATOMIC FORCES' entry was not found in the CP2K output file. Please make sure that you have the correct 'GLOBAL.Run_type'")
+            print_warning("'ATOMIC FORCES' entry was not found in the CP2K output file. Please make sure that you have the correct 'GLOBAL.Run_type'")
+            return None
 
         # Parse the force string
         force_string = force_matches[-1]
@@ -160,7 +161,7 @@ class CP2K(Calculator, object):
         return forces
 
     def get_potential_energy(self, atoms=None, force_consistent=False):
-        """Return total energy.
+        """Return latest total energy from the output file.
 
         Only the energy extrapolated to zero Kelvin is currently supported.
         """
@@ -177,7 +178,19 @@ class CP2K(Calculator, object):
                 print_warning("More than one 'ENERGY' entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
             return float(energy[-1])
         else:
-            raise Exception("'ENERGY' entry was not found in the CP2K output file. Please make sure that you have the correct 'GLOBAL.Run_type'")
+            print_warning("'ENERGY' entry was not found in the CP2K output file. Please make sure that you have the correct 'GLOBAL.Run_type'")
+            return None
+
+    def get_output_value(self, regular_expression):
+        """Return any values from the output file corresponding to the given
+        python regular expression."""
+
+        energy = re.findall(regular_expression, self.output)
+        if len(energy) != 0:
+            return energy
+        else:
+            print_warning("The requested entry was not found in the CP2K output file. Returning 'None'")
+            return None
 
     def create_cell(self, subsys, atoms):
         """Creates the cell for a SUBSYS from an ASE Atoms object.
@@ -243,40 +256,40 @@ class CP2K(Calculator, object):
         else:
             poisson.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
 
-    def create_fixed_atoms(self, subsys, atoms):
-        """Creates the constraints corresponding to ASE's FixAtoms class.
+    #def create_fixed_atoms(self, subsys, atoms):
+        #"""Creates the constraints corresponding to ASE's FixAtoms class.
 
-        The way constraints are defined in ASE and CP2K are very different.
-        Only few special cases have a 1-to-1 mapping between them and thus most
-        CP2K constraints cannot be created from ASE constraints. FixAtoms is
-        one of the special cases.
+        #The way constraints are defined in ASE and CP2K are very different.
+        #Only few special cases have a 1-to-1 mapping between them and thus most
+        #CP2K constraints cannot be created from ASE constraints. FixAtoms is
+        #one of the special cases.
 
-        args:
-            subsys: pycp2k.parsedclasses._subsys1
-                The SUBSYS for which the contraint applies.
-            atoms: ASE Atoms
-                Atoms from which the FixAtom contraint is extracted.
-        """
-        CONSTRAINT = self.CP2K_INPUT.MOTION.CONSTRAINT
-        constraints = atoms._constraints
-        n_constraints = 0
-        if type(constraints) is not list:
-            constraints = [constraints]
-        for constraint in constraints:
-            # FixAtoms -> CONSTRAINT.FIXED_ATOMS
-            n_constraints += 1
-            if isinstance(constraint, FixAtoms):
-                if len(constraint.index) == len(atoms) and all(i <= 1 for i in constraint.index):
-                    indices = np.where(constraint.index)[0]
-                else:
-                    indices = constraint.index
-                # CP2K indexing starts at 1
-                indices = [x+1 for x in indices]
-                fixed_atoms = CONSTRAINT.FIXED_ATOMS_add()
-                fixed_atoms.Components_to_fix = "XYZ"
-                fixed_atoms.List = " ".join(map(str, indices))
-        if n_constraints == 0:
-            print_warning("No 'FixAtoms' constraints found.")
+        #args:
+            #subsys: pycp2k.parsedclasses._subsys1
+                #The SUBSYS for which the contraint applies.
+            #atoms: ASE Atoms
+                #Atoms from which the FixAtom contraint is extracted.
+        #"""
+        #CONSTRAINT = self.CP2K_INPUT.MOTION.CONSTRAINT
+        #constraints = atoms._constraints
+        #n_constraints = 0
+        #if type(constraints) is not list:
+            #constraints = [constraints]
+        #for constraint in constraints:
+            ## FixAtoms -> CONSTRAINT.FIXED_ATOMS
+            #n_constraints += 1
+            #if isinstance(constraint, FixAtoms):
+                #if len(constraint.index) == len(atoms) and all(i <= 1 for i in constraint.index):
+                    #indices = np.where(constraint.index)[0]
+                #else:
+                    #indices = constraint.index
+                ## CP2K indexing starts at 1
+                #indices = [x+1 for x in indices]
+                #fixed_atoms = CONSTRAINT.FIXED_ATOMS_add()
+                #fixed_atoms.Components_to_fix = "XYZ"
+                #fixed_atoms.List = " ".join(map(str, indices))
+        #if n_constraints == 0:
+            #print_warning("No 'FixAtoms' constraints found.")
 
     def write_input_file(self):
         """Creates an input file for CP2K executable from the object tree

@@ -103,3 +103,4 @@ calc.run()
 # 3. Write the input file, run CP2K as a subprocess and fetch results from the output file.
 print calc.get_potential_energy()
 print calc.get_forces()
+print calc.get_output_value(r"SCF run converged in\s*(\d*)\s*steps")

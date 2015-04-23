@@ -20,11 +20,10 @@ The benefits of using PYCP2K over using the traditional CP2K input files:
 - Create and run CP2K simulations with one python script.
 - Modular simulation setup by e.g. using functions to create parts of the input
 - Structure creation and loading with [ASE](https://wiki.fysik.dtu.dk/ase/)
+- Easily extract results from the output file with predefined functions or with custom regular expressions
 - Autocompletion if provided by your IDE (tested with [Spyder](https://code.google.com/p/spyderlib/))
 - Built-in documentation for all keywords and sections (with [Spyder](https://code.google.com/p/spyderlib/) you can access documentation by control-clicking the variable names). 
 - Use additional python libraries (numpy, scipy, matplotlib, etc.) to also analyze the results - all with python.
-
-PYCP2K is able to use the ASE library for creating structures and loading [many different atomic structure files](https://wiki.fysik.dtu.dk/ase/ase/io.html).
 
 Technically the interfacing to CP2K happens simply by writing CP2K input files and reading the output files. There is no direct interface to the fortran code (i.e. F2PY not used).
 
@@ -88,14 +87,20 @@ calc.create_coord(SUBSYS, lattice)
 
 #======================= Run the simulation ============================
 calc.run()
+
+#======================= Fetch results ============================
+print calc.get_potential_energy()
+print calc.get_forces()
+print calc.get_output_value(r"SCF run converged in\s*(\d*)\s*steps")
+
 ```
 <a name="linux"></a>
 3\. Installation on Linux Desktop
 --------------------------------------------------
 These installation instructions were tested on Ubuntu 14.04 x64:
 
-1. This package depends on the numpy package. Please install it first.
-   1. [Full SciPy stack](http://www.scipy.org/install.html)
+1. This package depends on the [numpy package](http://www.scipy.org/install.html). Please install it first.
+2. Install [ASE](https://wiki.fysik.dtu.dk/ase/) if you want to use ASE's structure creation or loading. Not mandatory.
 2. Pull this repository to any location on your computer:
 
    ```
