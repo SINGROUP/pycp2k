@@ -78,7 +78,7 @@ class CP2K(object):
         self._project_name = None
         self.cp2k_command = pycp2k.config.cp2k_default_command
         self.cp2k_flags = []
-        self.mpi_on = True
+        self.mpi_on = pycp2k.config.mpi_on_default
         self.mpi_flags = []
         self.mpi_n_processes = None
         self.mpi_command = pycp2k.config.mpi_default_command

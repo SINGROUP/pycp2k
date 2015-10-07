@@ -67,6 +67,7 @@ calc.create_coord(SUBSYS, lattice)
 
 FORCE_EVAL.Method = "Quickstep"
 FORCE_EVAL.PRINT.FORCES.Section_parameters = "ON"
+FORCE_EVAL.PRINT.FORCES.Filename = "/home/lauri/forces"
 DFT.Basis_set_file_name = "/home/lauri/BASIS_SET"
 DFT.Potential_file_name = "/home/lauri/GTH_POTENTIALS"
 DFT.QS.Eps_default = 1.0E-10

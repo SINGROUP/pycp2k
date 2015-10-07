@@ -169,10 +169,12 @@ def main():
     print ""
     option_number = ask('Enter option number: ', range(1, len(cp2k_commands)+2))
 
+    mpi_on_default = True
     if option_number == len(mpi_commands)+2:
         mpi_default_command = raw_input('Enter MPI executable name: ')
     elif option_number == 1:
         mpi_default_command = ""
+        mpi_on_default = False
     else:
         mpi_default_command = mpi_commands[int(option_number-2)]
 
@@ -188,6 +190,7 @@ def main():
                     "# -*- coding: utf-8 -*-\n\n"
                     "cp2k_default_command = \"" + cp2k_default_command + "\"\n"
                     "mpi_default_command = \"" + mpi_default_command + "\"\n"
+                    "mpi_on_default = " + str(mpi_on_default) + "\n"
                     "build_version = \"" + version.split()[2] + "\"\n"
                     "build_revision = \"" + revision.split()[-1] + "\"")
         config_file.write(contents)
