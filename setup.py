@@ -1,6 +1,6 @@
 from setuptools import setup
 import inputparser
-from pycp2k import utilities
+import utilities
 import textwrap
 import os
 import os.path
@@ -138,7 +138,7 @@ def main():
                 print "    [" + str(i+1) + "] " + name
         print "    [{}] Custom CP2K executable name".format(len(cp2k_commands)+1)
         print ""
-        option_number = ask('Enter option number: ', range(1, len(cp2k_commands)+1))
+        option_number = ask('Enter option number: ', range(1, len(cp2k_commands)+2))
 
         if option_number == len(cp2k_commands)+1:
             cp2k_default_command = raw_input('Enter CP2K executable name: ')

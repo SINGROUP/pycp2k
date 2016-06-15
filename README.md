@@ -23,8 +23,6 @@ The benefits of using PYCP2K over using the traditional CP2K input files:
 - Create and run CP2K simulations with one python script.
 - Modular simulation setup by e.g. using functions to create parts of the input
 - Structure creation and loading with [ASE](https://wiki.fysik.dtu.dk/ase/)
-- Easily extract results from the output file with predefined functions or with
-  custom regular expressions
 - Autocompletion if provided by your IDE (tested with VIM plugin
   [YouCompleteMe](https://valloric.github.io/YouCompleteMe/) and the
   [Spyder](https://code.google.com/p/spyderlib/) IDE)
@@ -32,8 +30,7 @@ The benefits of using PYCP2K over using the traditional CP2K input files:
   analyze the results - all with python.
 
 Technically the interfacing to CP2K happens simply by writing CP2K input files
-and reading the output files. There is no direct interface to the fortran code
-(i.e. F2PY not used).
+and reading the output files. There is no direct interface to the fortran code.
 
 <a name="example"></a>
 2\. Example

@@ -4,5 +4,11 @@
 *.wfn.bak-1
 *~
 *.xml
-pycp2k/parsedclasses.py
+*.html
+pycp2k/classes/*.py
+pycp2k/classes/*.pyc
 pycp2k/parsedclasses.pyc
+pycp2k/config.py
+pycp2k.egg-info/
+
+!pycp2k/classes/__init__.py

@@ -6,7 +6,7 @@ file.
 """
 
 import xml.etree.cElementTree as cElementTree
-from pycp2k import utilities
+import utilities
 import textwrap
 
 
