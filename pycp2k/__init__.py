@@ -1,1 +1,1 @@
-#! /usr/bin/env python
+from cp2k import CP2K

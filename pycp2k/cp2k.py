@@ -3,15 +3,13 @@
 
 """This module defines an ASE calculator interface to CP2K."""
 
-from pycp2k.parsedclasses import _CP2K_INPUT1
+from pycp2k.classes._CP2K_INPUT1 import _CP2K_INPUT1
 from pycp2k.utilities import print_title, print_text, print_warning, print_error
 import pycp2k.config
-#from ase.calculators.interface import Calculator
 from subprocess import call, check_output, CalledProcessError
 import re
 import numpy as np
 import os
-#from ase.constraints import FixAtoms
 import time
 
 
@@ -72,10 +70,10 @@ class CP2K(object):
     def __init__(self, atoms=None, input_path=None, output_path=None):
         """Construct CP2K-calculator object."""
         self.CP2K_INPUT = _CP2K_INPUT1()
-        self.input_path = input_path
-        self.output_path = output_path
+        self._input_path = input_path
+        self._output_path = output_path
         self.working_directory = None
-        self._project_name = None
+        self.project_name = None
         self.cp2k_command = pycp2k.config.cp2k_default_command
         self.cp2k_flags = []
         self.mpi_on = pycp2k.config.mpi_on_default
@@ -84,7 +82,28 @@ class CP2K(object):
         self.mpi_command = pycp2k.config.mpi_default_command
         self.old_input = None
         self.new_input = None
-        self.output = None
+
+    @property
+    def output_path(self):
+        if self._output_path is not None:
+            return self._output_path
+        else:
+            return self.working_directory + "/" + self.project_name + ".out"
+
+    @output_path.setter
+    def output_path(self, x):
+        self._output_path = x
+
+    @property
+    def input_path(self):
+        if self._input_path is not None:
+            return self._input_path
+        else:
+            return self.working_directory + "/" + self.project_name + ".inp"
+
+    @input_path.setter
+    def input_path(self, x):
+        self._input_path = x
 
     @property
     def project_name(self):
@@ -128,70 +147,6 @@ class CP2K(object):
             new_input = self.CP2K_INPUT._print_input(-1)
             return new_input != self.old_input
 
-    def get_forces(self, atoms=None):
-        """Return the latest forces from the output file.
-
-        Returns a numpy array of 3D forces from the output file for each atom in the same order in
-        which atoms have been defined.
-        """
-        if self.calculation_required(quantities=["forces"]):
-            self.run()
-
-        force_matches = re.findall(r"ATOMIC FORCES in.*\n\n.*\n((?:\s{6}.*\n)*) SUM OF ATOMIC FORCES", self.output)
-        if len(force_matches) != 0:
-            if len(force_matches) > 1:
-                print_warning("More than one 'ATOMIC FORCES' entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
-        else:
-            print_warning("'ATOMIC FORCES' entry was not found in the CP2K output file. Please make sure that you have the correct 'GLOBAL.Run_type'")
-            return None
-
-        # Parse the force string
-        force_string = force_matches[-1]
-        lines = force_string.splitlines()
-        forces = np.zeros([len(lines), 3])
-        for i, line in enumerate(lines):
-            words = line.split()
-            z = float(words[-1])
-            y = float(words[-2])
-            x = float(words[-3])
-            forces[i, 0] = x
-            forces[i, 1] = y
-            forces[i, 2] = z
-
-        return forces
-
-    def get_potential_energy(self, atoms=None, force_consistent=False):
-        """Return latest total energy from the output file.
-
-        Only the energy extrapolated to zero Kelvin is currently supported.
-        """
-        if force_consistent:
-            print_warning("Fetching the energy consistent with the forces (the free energy) is not implemented yet.")
-            return None
-
-        if self.calculation_required(quantities=["energy"]):
-            self.run()
-
-        energy = re.findall(r"ENERGY\|.*:\s*([-+]?\d*\.\d+|\d+)", self.output)
-        if len(energy) != 0:
-            if len(energy) > 1:
-                print_warning("More than one 'ENERGY' entries were found in the output file. Probably due to the fact that outputs are appended to the same file. The last entry is returned.")
-            return float(energy[-1])
-        else:
-            print_warning("'ENERGY' entry was not found in the CP2K output file. Please make sure that you have the correct 'GLOBAL.Run_type'")
-            return None
-
-    def get_output_value(self, regular_expression):
-        """Return any values from the output file corresponding to the given
-        python regular expression."""
-
-        energy = re.findall(regular_expression, self.output)
-        if len(energy) != 0:
-            return energy
-        else:
-            print_warning("The requested entry was not found in the CP2K output file. Returning 'None'")
-            return None
-
     def create_cell(self, subsys, atoms):
         """Creates the cell for a SUBSYS from an ASE Atoms object.
 
@@ -214,10 +169,17 @@ class CP2K(object):
         subsys.CELL.C = C.tolist()
 
         pbc = atoms.get_pbc()
-        if sum(pbc) == 0:
+        periodicity = []
+        if pbc[0]:
+            periodicity.append("X")
+        if pbc[1]:
+            periodicity.append("Y")
+        if pbc[2]:
+            periodicity.append("Z")
+        if len(periodicity) == 0:
             subsys.CELL.Periodic = "NONE"
         else:
-            subsys.CELL.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
+            subsys.CELL.Periodic = "".join(periodicity)
 
     def create_coord(self, subsys, atoms, molnames=None):
         """Creates the atomic coordinates for a SUBSYS from an ASE Atoms object.
@@ -256,41 +218,6 @@ class CP2K(object):
         else:
             poisson.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
 
-    #def create_fixed_atoms(self, subsys, atoms):
-        #"""Creates the constraints corresponding to ASE's FixAtoms class.
-
-        #The way constraints are defined in ASE and CP2K are very different.
-        #Only few special cases have a 1-to-1 mapping between them and thus most
-        #CP2K constraints cannot be created from ASE constraints. FixAtoms is
-        #one of the special cases.
-
-        #args:
-            #subsys: pycp2k.parsedclasses._subsys1
-                #The SUBSYS for which the contraint applies.
-            #atoms: ASE Atoms
-                #Atoms from which the FixAtom contraint is extracted.
-        #"""
-        #CONSTRAINT = self.CP2K_INPUT.MOTION.CONSTRAINT
-        #constraints = atoms._constraints
-        #n_constraints = 0
-        #if type(constraints) is not list:
-            #constraints = [constraints]
-        #for constraint in constraints:
-            ## FixAtoms -> CONSTRAINT.FIXED_ATOMS
-            #n_constraints += 1
-            #if isinstance(constraint, FixAtoms):
-                #if len(constraint.index) == len(atoms) and all(i <= 1 for i in constraint.index):
-                    #indices = np.where(constraint.index)[0]
-                #else:
-                    #indices = constraint.index
-                ## CP2K indexing starts at 1
-                #indices = [x+1 for x in indices]
-                #fixed_atoms = CONSTRAINT.FIXED_ATOMS_add()
-                #fixed_atoms.Components_to_fix = "XYZ"
-                #fixed_atoms.List = " ".join(map(str, indices))
-        #if n_constraints == 0:
-            #print_warning("No 'FixAtoms' constraints found.")
-
     def write_input_file(self):
         """Creates an input file for CP2K executable from the object tree
         defined in CP2K_INPUT.
@@ -299,24 +226,11 @@ class CP2K(object):
         input_contents = self.CP2K_INPUT._print_input(-1)
 
         # Write the file
-        with open(self.get_input_path(), 'w') as input_file:
+        with open(self.input_path, 'w') as input_file:
             input_file.write(input_contents)
 
-    def get_input_path(self):
-        """Determine input file path."""
-        if self.input_path is not None:
-            return self.input_path
-        else:
-            return self.working_directory + "/" + self.project_name + ".inp"
 
-    def get_output_path(self):
-        """Determine output file path."""
-        if self.output_path is not None:
-            return self.output_path
-        else:
-            return self.working_directory + "/" + self.project_name + ".out"
-
-    def run(self, print_input=False, print_output=False):
+    def run(self, print_input=False):
         """Runs the input script."""
 
         print_title("PYCP2K RUN STARTED")
@@ -361,8 +275,8 @@ class CP2K(object):
 
         # CP2K command and flags
         command_list.append(self.cp2k_command)
-        command_list.append("-o " + str(self.get_output_path()))
-        command_list.append("-i " + str(self.get_input_path()))
+        command_list.append("-o " + str(self.output_path))
+        command_list.append("-i " + str(self.input_path))
         for flag in self.cp2k_flags:
             command_list.append(str(flag))
 
@@ -372,7 +286,7 @@ class CP2K(object):
 
         # Perform syntax check
         print_text(">> Performing syntax check on input file...")
-        command_for_syntax_check = " ".join([self.cp2k_command, "-i " + str(self.get_input_path()), "--check"])
+        command_for_syntax_check = " ".join([self.cp2k_command, "-i " + str(self.input_path), "--check"])
         syntax_result = check_output(command_for_syntax_check, shell=True, cwd=working_directory)
         if syntax_result[0:7] != "SUCCESS":
             print_error("Syntax error in the input file. See the following output for further details.")
@@ -392,7 +306,7 @@ class CP2K(object):
         try:
             check_output(command_string, shell=True, cwd=working_directory)
         except CalledProcessError:
-            error_output_path = self.get_output_path()
+            error_output_path = self.output_path
             print_error("Error occured during CP2K calculation. See the output from {} for further details.".format(error_output_path))
             raise
         end = time.time()
@@ -401,14 +315,6 @@ class CP2K(object):
         h, m = divmod(m, 60)
         print_text(">> CP2K calculation finished succesfully!")
         print_text(">> Elapsed time: {:.0f}h:{:.0f}m:{:.0f}s".format(h, m, s))
-
-        # Open the output file
-        with open(self.get_output_path(), 'r') as output_file:
-            self.output = output_file.read()
-
-        if print_output:
-            print_text(">> CP2K output file:")
-            print self.output
 
         # Save this input to old_input
         self.old_input = self.CP2K_INPUT._print_input(-1)

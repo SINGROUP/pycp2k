@@ -1,6 +1,5 @@
-#! /usr/bin/env python
-
-from pycp2k.cp2k import CP2K
+import re
+from pycp2k import CP2K
 from ase.lattice.cubic import Diamond
 from ase.visualize import view
 
@@ -12,7 +11,6 @@ lattice = Diamond(directions=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
                   size=(1, 1, 1))
 
 view(lattice)
-#view(lattice, viewer='VMD', block=True)
 
 #===============================================================================
 # Setup directories and mpi
@@ -67,6 +65,12 @@ energies = []
 for cutoff in range(40, 90, 20):
     DFT.MGRID.Cutoff = cutoff
     calc.output_path = calc.working_directory + "/" + calc.project_name + str(cutoff) + ".out"
-    energies.append(calc.get_potential_energy())
+    calc.run()
+    with open(calc.output_path, "r") as fin:
+        regex = re.compile(" ENERGY\| Total FORCE_EVAL \( QS \) energy \(a\.u\.\):\s+(.+)\n")
+        for line in fin:
+            match = regex.match(line)
+            if match:
+                energies.append(match.groups()[0])
 
 print energies

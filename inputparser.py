@@ -122,10 +122,14 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     inp_name = ""
 
     # Initial string for each section of the class
+    imports = ["from pycp2k.inputsection import InputSection"]
     docstring = ""
     properties = ""
     setters = ""
-    public = "    def __init__(self):\n"
+    public = (
+        "    def __init__(self):\n"
+        "        InputSection.__init__(self)\n"
+    )
     private = ""
     class_subsections = ""
     functions = "\n"
@@ -143,13 +147,13 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
 
     # Start writing class body
     section_description = section.find("DESCRIPTION")
-    if section_description is not None and section_description.text is not None:
-        docstring += "    \"\"\"\n"
-        for line in textwrap.wrap(section_description.text):
-            docstring += "    " + line + "\n"
-        docstring += "    \"\"\"\n"
-    else:
-        docstring += "    \"\"\"\"\"\"\n"
+    # if section_description is not None and section_description.text is not None:
+        # docstring += "    \"\"\"\n"
+        # for line in textwrap.wrap(section_description.text):
+            # docstring += "    " + line + "\n"
+        # docstring += "    \"\"\"\n"
+    # else:
+        # docstring += "    \"\"\"\"\"\"\n"
 
     #---------------------------------------------------------------------------
     # Create attribute for section parameter
@@ -159,7 +163,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
         public += "        self.Section_parameters = None\n"
 
         # Write the description for the section parameter
-        public += create_docstring(section_parameters)
+        # public += create_docstring(section_parameters)
 
     #---------------------------------------------------------------------------
     # Create attribute for all the keywords
@@ -189,11 +193,11 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                     # Special case for repeateable keywords.
                     if keyword.get("repeats") == "yes":
                         public += "        self." + newname + " = []\n"
-                        public += create_docstring(keyword)
+                        # public += create_docstring(keyword)
                         repeated_keywords[newname] = name
                     else:
                         public += "        self." + newname + " = None\n"
-                        public += create_docstring(keyword)
+                        # public += create_docstring(keyword)
                         keywords[newname] = name
 
                 # Create properties for aliases
@@ -225,11 +229,11 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
 
         if default_keyword.get("repeats") == "yes":
             public += "        self." + newname + " = []\n"
-            public += create_docstring(default_keyword)
+            # public += create_docstring(default_keyword)
             repeated_default_keywords[newname] = name
         else:
             public += "        self." + newname + " = None\n"
-            public += create_docstring(default_keyword)
+            # public += create_docstring(default_keyword)
             default_keywords[newname] = name
 
     #---------------------------------------------------------------------------
@@ -241,6 +245,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
         member_name = member_name.replace("+", "PLUS")
         if member_name[0].isdigit():
             member_name = "_" + member_name
+        imports.append("from {0} import {0}".format(member_class_name))
 
         # Special case for repeateable sections. Create a dictionary of the
         # subsections and add a function for creating them.
@@ -255,15 +260,24 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
     #---------------------------------------------------------------------------
     # Write a list of the stored variable names
     private += "        self._name = \"" + str(inp_name) + "\"\n"
-    private += "        self._keywords = " + str(keywords) + "\n"
-    private += "        self._repeated_keywords = " + str(repeated_keywords) + "\n"
-    private += "        self._default_keywords = " + str(default_keywords) + "\n"
-    private += "        self._repeated_default_keywords = " + str(repeated_default_keywords) + "\n"
-    private += "        self._subsections = " + str(subsections) + "\n"
-    private += "        self._repeated_subsections = " + str(repeated_subsections) + "\n"
-    private += "        self._aliases = " + str(aliases) + "\n"
-    private += "        self._repeated_aliases = " + str(repeated_aliases) + "\n"
-    private += "        self._attributes = " + str(attributes) + "\n"
+    if len(keywords) != 0:
+        private += "        self._keywords = " + str(keywords) + "\n"
+    if len(repeated_keywords) != 0:
+        private += "        self._repeated_keywords = " + str(repeated_keywords) + "\n"
+    if len(default_keywords) != 0:
+        private += "        self._default_keywords = " + str(default_keywords) + "\n"
+    if len(repeated_default_keywords) != 0:
+        private += "        self._repeated_default_keywords = " + str(repeated_default_keywords) + "\n"
+    if len(subsections) != 0:
+        private += "        self._subsections = " + str(subsections) + "\n"
+    if len(repeated_subsections) != 0:
+        private += "        self._repeated_subsections = " + str(repeated_subsections) + "\n"
+    if len(aliases) != 0:
+        private += "        self._aliases = " + str(aliases) + "\n"
+    if len(repeated_aliases) != 0:
+        private += "        self._repeated_aliases = " + str(repeated_aliases) + "\n"
+    if len(attributes) != 0:
+        private += "        self._attributes = " + str(attributes) + "\n"
 
     #---------------------------------------------------------------------------
     # Write a function for adding repeateable sections
@@ -278,18 +292,15 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
                       "        self." + attribute_name + "_list.append(new_section)\n"
                       "        return new_section\n\n")
 
-    # Write a function for printing original CP2K input files
-    functions += ("    def _print_input(self, level):\n"
-                  "        return printable._print_input(self, level)\n")
-
     #---------------------------------------------------------------------------
     # The class names are not unique. Use numbering to identify classes.
     exists = False
+    import_string = "\n".join(imports)
     class_string = docstring + public + class_subsections + private + functions + properties + setters
     version_number = version_dictionary.get(class_name)
     if version_number is None:
         version_dictionary[class_name] = 1
-        class_dictionary[class_name+str(1)] = class_string
+        class_dictionary[class_name+str(1)] = (import_string, class_string)
         return class_name+str(1)
 
     for version in range(version_number):
@@ -301,7 +312,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
 
     if not exists:
         version_dictionary[class_name] = version_number + 1
-        class_dictionary[class_name+str(version_number + 1)] = class_string
+        class_dictionary[class_name+str(version_number + 1)] = (import_string, class_string)
         return class_name + str(version_number + 1)
     else:
         return class_name + str(version_number)
@@ -321,25 +332,23 @@ def main(xml_path):
     version = root.find("CP2K_VERSION").text
     revision = root.find("COMPILE_REVISION").text
 
-    module_header = (
-        "#! /usr/bin/env python\n"
-        "# -*- coding: utf-8 -*-\n\n"
-        "\"\"\"This module holds all the classes parsed from xml file created with command\ncp2k --xml\"\"\"\n\n"
-        "from pycp2k.printable import printable\n"
-    )
     class_dictionary = {}
     version_dictionary = {}
     recursive_class_creation(root, 0, class_dictionary, version_dictionary)
 
-    # Write one module containing all the parsed classes.
-    with open('pycp2k/parsedclasses.py', 'w') as file:
-        file.write(module_header)
-        for class_name, class_body in class_dictionary.iteritems():
+    # Put each class into its own module. This produces manu small files, but
+    # this way it it easier for autocompletion to handle everything
+    n_classes = len(class_dictionary)
+    n_class_per_module = 1
+    i_module = 0
+    for class_name, class_body in class_dictionary.iteritems():
+        with open('pycp2k/classes/{}.py'.format(class_name), 'w') as file:
+            file.write(class_body[0] + "\n\n\n")
             class_body_header = (
-                "\n\nclass " + class_name + "(printable):\n"
+                "class " + class_name + "(InputSection):\n"
             )
             file.write(class_body_header.encode('utf8'))
-            file.write(class_body.encode('utf8'))
+            file.write(class_body[1].encode('utf8'))
 
     return (version, revision)
 

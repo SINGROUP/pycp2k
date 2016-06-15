@@ -42,7 +42,6 @@ def which(program):
 
 #===============================================================================
 def ask(question, options):
-    print options
     answer_valid = False
     while not answer_valid:
         answer = raw_input(question)
@@ -124,23 +123,11 @@ def main():
     #---------------------------------------------------------------------------
     # xml chosen
     else:
-        available_versions = ["2.4.0", "2.5.1", "2.6.0"]
         print "|------------------------------------------------------------------------------|"
-        print textwrap.fill("Which .xml file should be used:", width=80)
-        print ""
-        for i, version in enumerate(available_versions):
-            print "    [{}] cp2k_input_{}.xml".format(i+1, version)
-        print "    [{}] Provide path to .xml file".format(len(available_versions)+1)
-        print ""
-        option_number = ask('Enter option number: ', range(1, len(available_versions)+2))
-
-        if option_number == len(available_versions) + 1:
-            xml_path = raw_input('Enter path to .xml file: ')
-            while not os.path.isfile(xml_path):
-                print "Invalid path provided. Please try again"
-                xml_path = raw_input('Enter path to .xml file:')
-        else:
-            xml_path = "cp2k_input_{}.xml".format(available_versions[option_number - 1])
+        xml_path = raw_input('Enter path to .xml file: ')
+        while not os.path.isfile(xml_path):
+            print "Invalid path provided. Please try again"
+            xml_path = raw_input('Enter path to .xml file:')
 
         #---------------------------------------------------------------------------
         # Ask for the default CP2K command

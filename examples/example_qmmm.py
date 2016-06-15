@@ -1,8 +1,7 @@
-#! /usr/bin/env python
 """
 QM/MM test simulation
 """
-from pycp2k.cp2k import CP2K
+from pycp2k import CP2K
 
 #===============================================================================
 # Setup calculator
@@ -28,8 +27,8 @@ GLOBAL.Run_type = "MD"
 #===============================================================================
 # FORCE EVAL
 FORCE_EVAL.Method = "QMMM"
-DFT.Basis_set_file_name = "GTH_BASIS_SETS"
-DFT.Potential_file_name = "POTENTIAL"
+DFT.Basis_set_file_name = "BASIS_SET"
+DFT.Potential_file_name = "GTH_POTENTIALS"
 DFT.MGRID.Commensurate = "T"
 DFT.MGRID.Cutoff = 300
 DFT.SCF.Scf_guess = "atomic"
@@ -115,11 +114,11 @@ SUBSYS.COORD.Default_keyword = [
     ["H", -2.090603, 1.352766, 1.597519, "H2O"]
 ]
 h_kind = SUBSYS.KIND_add("H")
-h_kind.Basis_set = "SZV-GTH"
+h_kind.Basis_set = "SZV-GTH-PADE"
 h_kind.Potential = "GTH-PADE-q1"
 
 h_kind = SUBSYS.KIND_add("O")
-h_kind.Basis_set = "SZV-GTH"
+h_kind.Basis_set = "SZV-GTH-PADE"
 h_kind.Potential = "GTH-PADE-q6"
 
 #===============================================================================
