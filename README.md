@@ -32,6 +32,8 @@ The benefits of using PYCP2K over using the traditional CP2K input files:
 Technically the interfacing to CP2K happens simply by writing CP2K input files
 and reading the output files. There is no direct interface to the fortran code.
 
+<img src="https://raw.githubusercontent.com/SINGROUP/pycp2k/master/example.gif"></img>
+
 <a name="example"></a>
 2\. Example
 --------------------------------------------------
