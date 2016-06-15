@@ -42,6 +42,7 @@ def which(program):
 
 #===============================================================================
 def ask(question, options):
+    print options
     answer_valid = False
     while not answer_valid:
         answer = raw_input(question)
@@ -77,8 +78,6 @@ def main():
         if which(item[0]) is not None:
             item[1] = True
 
-    print len(cp2k_commands)
-
     #---------------------------------------------------------------------------
     # Ask user whether to use executable or xml
     print textwrap.fill("How should the input structure be created?", width=80)
@@ -87,7 +86,8 @@ def main():
     for i_option, option in enumerate(options1):
         print "    [{}]  {}".format(i_option+1, option)
     print ""
-    source = ask('Enter option number: ', range(1, len(options1)))
+    opt = range(1, len(options1)+1)
+    source = ask('Enter option number: ', opt)
 
     #---------------------------------------------------------------------------
     # Executable chosen
@@ -103,7 +103,9 @@ def main():
             else:
                 print "    [x] {} not available".format(name)
         print "    [" + str(len(cp2k_commands)+1) + "] Custom CP2K executable name\n"
-        option_number = ask('Enter option number: ', [x for x in range(1, len(cp2k_commands)) if cp2k_commands[x-1][1]])
+        options = [x for x in range(1, len(cp2k_commands)) if cp2k_commands[x-1][1]]
+        options.append(len(cp2k_commands)+1)
+        option_number = ask('Enter option number: ', options)
 
         if option_number == len(cp2k_commands)+1:
             cp2k_default_command = raw_input('Enter CP2K executable name: ')
@@ -130,7 +132,7 @@ def main():
             print "    [{}] cp2k_input_{}.xml".format(i+1, version)
         print "    [{}] Provide path to .xml file".format(len(available_versions)+1)
         print ""
-        option_number = ask('Enter option number: ', range(1, len(available_versions)+1))
+        option_number = ask('Enter option number: ', range(1, len(available_versions)+2))
 
         if option_number == len(available_versions) + 1:
             xml_path = raw_input('Enter path to .xml file: ')
@@ -167,7 +169,7 @@ def main():
         print "    [{}] {}".format(i+2, name)
     print "    [{}] Custom MPI executable name".format(len(mpi_commands)+2)
     print ""
-    option_number = ask('Enter option number: ', range(1, len(cp2k_commands)+2))
+    option_number = ask('Enter option number: ', range(1, len(mpi_commands)+3))
 
     mpi_on_default = True
     if option_number == len(mpi_commands)+2:
