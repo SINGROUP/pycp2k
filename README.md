@@ -92,7 +92,8 @@ KIND.Potential = "GTH-PADE-q4"
 calc.create_cell(SUBSYS, lattice)
 calc.create_coord(SUBSYS, lattice)
 
-#======================= Run the simulation ============================
+#============ Run the simulation or just write the input file ================
+#calc.write_input_file()
 calc.run()
 
 ```
