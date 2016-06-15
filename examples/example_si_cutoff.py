@@ -15,7 +15,7 @@ view(lattice)
 #===============================================================================
 # Setup directories and mpi
 calc = CP2K()
-calc.working_directory = "/home/lauri"
+calc.working_directory = "./"
 calc.project_name = "si_bulk"
 calc.mpi_n_processes = 2
 

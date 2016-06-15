@@ -6,7 +6,7 @@ from pycp2k import CP2K
 #===============================================================================
 # Setup calculator
 calc = CP2K()
-calc.working_directory = "/home/lauri"
+calc.working_directory = "./"
 calc.project_name = "qmmmwater"
 calc.mpi_n_processes = 2
 

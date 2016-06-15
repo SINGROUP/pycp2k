@@ -25,7 +25,7 @@ lattice = Diamond(directions=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
 # directory, but you can change the working directory with
 # calc.working_directory.
 calc = CP2K()
-calc.working_directory = "/home/lauri"
+calc.working_directory = "./"
 calc.project_name = "si_bulk"
 calc.mpi_n_processes = 2
 
