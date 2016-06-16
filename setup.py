@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import inputparser
 import utilities
 import textwrap
@@ -192,7 +192,7 @@ def main():
           author='Lauri Himanen',
           author_email='lauri.himanen@gmail.com',
           license='GPL3',
-          packages=['pycp2k'],
+          packages=find_packages(),
           zip_safe=False)
 
     utilities.print_title("INSTALLATION COMPLETED SUCCESFULLY")
