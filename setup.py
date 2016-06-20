@@ -192,8 +192,7 @@ def main():
           author='Lauri Himanen',
           author_email='lauri.himanen@gmail.com',
           license='GPL3',
-          packages=find_packages(),
-          zip_safe=False)
+          packages=find_packages())
 
     utilities.print_title("INSTALLATION COMPLETED SUCCESFULLY")
 
