@@ -10,7 +10,7 @@ lattice = Diamond(directions=[[1, 0, 0], [0, 1, 0], [0, 0, 1]],
                   latticeconstant=5.430697500,
                   size=(1, 1, 1))
 
-view(lattice)
+# view(lattice)
 
 #===============================================================================
 # Setup directories and mpi
