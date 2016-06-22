@@ -104,8 +104,8 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 
 1. This package depends on the [numpy
    package](http://www.scipy.org/install.html). Please install it first.
-2. Install [ASE](https://wiki.fysik.dtu.dk/ase/) if you want to use ASE's
-   structure creation or loading. Not mandatory.
+2. If you want to use ASE's structure creation or loading, install
+   [ASE](https://wiki.fysik.dtu.dk/ase/). Not mandatory.
 2. Pull this repository to any location on your computer:
 
    ```
@@ -132,6 +132,14 @@ These installation instructions were tested on Ubuntu 14.04 x64:
 
    ```
    sudo python setup.py install
+   ```
+5. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
+   PYTHONPATH system variable. It should be by default. You can check what
+   paths are available in python by running:
+
+   ```python
+   import sys
+   print "\n".join(sys.path)
    ```
 
 <a name="triton"></a>
@@ -165,6 +173,15 @@ with the appropriate changes.
       ```
       python setup.py install --user
       ```
+
+    4. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
+    PYTHONPATH system variable. It should be by default. You can check what
+    paths are available in python by running:
+
+    ```python
+    import sys
+    print "\n".join(sys.path)
+    ```
 
 2. Usage (MPI parallel run on Triton):
    1. Write the python script for your simulation. See the examples folder for
