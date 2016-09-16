@@ -1,8 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""This module defines an ASE calculator interface to CP2K."""
-
 from pycp2k.classes._CP2K_INPUT1 import _CP2K_INPUT1
 from pycp2k.utilities import print_title, print_text, print_warning, print_error
 import pycp2k.config
@@ -67,13 +65,23 @@ class CP2K(object):
         output: string
             The output of the last CP2K run
     """
-    def __init__(self, atoms=None, input_path=None, output_path=None):
-        """Construct CP2K-calculator object."""
+    def __init__(self, working_directory=None, input_path=None, output_path=None, project_name=None):
+        """
+        Args:
+            working_directory (str): The path where all the output and input
+                files will be stored in.
+            input_path (str): The path where the input file will be stored in.
+                Overrides working_directory.
+            output_path (str): The path where the output file will be saved.
+                Overrides working_directory.
+            project_name (str): The name of the project. Will be placed in
+                CP2K.GLOBAL.PROJECT_NAME
+        """
         self.CP2K_INPUT = _CP2K_INPUT1()
         self._input_path = input_path
         self._output_path = output_path
-        self.working_directory = None
-        self.project_name = None
+        self.working_directory = working_directory
+        self.project_name = project_name
         self.cp2k_command = pycp2k.config.cp2k_default_command
         self.cp2k_flags = []
         self.mpi_on = pycp2k.config.mpi_on_default
@@ -288,7 +296,9 @@ class CP2K(object):
         print_text(">> Performing syntax check on input file...")
         command_for_syntax_check = " ".join([self.cp2k_command, "-i " + str(self.input_path), "--check"])
         syntax_result = check_output(command_for_syntax_check, shell=True, cwd=working_directory)
-        if syntax_result[0:7] != "SUCCESS":
+        success_regex = re.compile("^SUCCESS", re.MULTILINE)
+        match = success_regex.search(syntax_result)
+        if match is None:
             print_error("Syntax error in the input file. See the following output for further details.")
             print syntax_result
             raise Exception

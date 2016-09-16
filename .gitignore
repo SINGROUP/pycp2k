@@ -17,3 +17,12 @@ examples/*.out
 examples/*.xyz
 
 !pycp2k/classes/__init__.py
+
+examples/*.ener
+examples/*.inp
+examples/*.restart
+examples/*.out
+examples/*.wfn
+examples/*.bak-1
+examples/*.bak-2
+examples/*.bak-3
