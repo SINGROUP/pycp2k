@@ -191,8 +191,9 @@ def main():
           url='https://github.com/SINGROUP/pycp2k.git',
           author='Lauri Himanen',
           author_email='lauri.himanen@gmail.com',
-          license='GPL3',
-          packages=find_packages())
+          license='MIT',
+          packages=find_packages(),
+          zip_safe=False)
 
     utilities.print_title("INSTALLATION COMPLETED SUCCESFULLY")
 
