@@ -6,6 +6,7 @@ PYCP2K: a python interface to CP2K
 3. [Installation on Linux Desktop](#linux)
 4. [Installation on Triton](#triton)
 5. [Implementation Notes](#notes)
+6. [Contact](#contact)
 
 <a name="introduction"></a>
 1\. Introduction
@@ -246,3 +247,8 @@ with the appropriate changes.
    of the repeatable sections can be accessed from attribute 'X\_list'.
 7. You can use aliases and even use several aliases for the same item in the
    scripts. However, the default name will be used in the input file.
+   
+<a name="contact"></a>
+6\. Contact
+--------------------------------------------------
+If you have any issues, or general questions regarding the package, please use github's issue system. Just simply open a new issue and put your message there. This way the discussion is open for other users, and may also help them in any possible problems.
