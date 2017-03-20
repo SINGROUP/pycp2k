@@ -108,4 +108,4 @@ with open(calc.output_path, "r") as fin:
     for line in fin:
         match = regex.match(line)
         if match:
-            print "Final energy: {}".format(match.groups()[0])
+            print("Final energy: {}".format(match.groups()[0]))

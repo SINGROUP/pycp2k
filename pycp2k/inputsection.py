@@ -98,19 +98,19 @@ class InputSection(object):
             return (level + 1) * "  " + name + " " + self._format_variable(item) + "\n"
 
     def _check_typos(self):
-        for attribute in self.__dict__.iterkeys():
+        for attribute in self.__dict__.keys():
             typos_found = True
-            if attribute in self._keywords.iterkeys():
+            if attribute in iter(self._keywords.keys()):
                 typos_found = False
-            elif attribute in self._repeated_keywords.iterkeys():
+            elif attribute in iter(self._repeated_keywords.keys()):
                 typos_found = False
-            elif attribute in self._subsections.iterkeys():
+            elif attribute in iter(self._subsections.keys()):
                 typos_found = False
-            elif attribute in self._repeated_subsections.iterkeys():
+            elif attribute in iter(self._repeated_subsections.keys()):
                 typos_found = False
-            elif attribute in self._aliases.iterkeys():
+            elif attribute in iter(self._aliases.keys()):
                 typos_found = False
-            elif attribute in self._repeated_aliases.iterkeys():
+            elif attribute in iter(self._repeated_aliases.keys()):
                 typos_found = False
             elif attribute in self._attributes:
                 typos_found = False
@@ -131,7 +131,7 @@ class InputSection(object):
 
         inp = ""
         # Non-repeatable default keywords
-        for attname, realname in self._default_keywords.iteritems():
+        for attname, realname in self._default_keywords.items():
             value = self.__dict__[attname]
             if value is not None:
                 if not (type(value) is list and not value):
@@ -139,7 +139,7 @@ class InputSection(object):
                     inp += parsed
 
         # Repeatable default keywords
-        for attname, realname in self._repeated_default_keywords.iteritems():
+        for attname, realname in self._repeated_default_keywords.items():
             keyword = self.__dict__[attname]
             if keyword is not None:
                 if not (type(keyword) is list and not keyword):
@@ -147,7 +147,7 @@ class InputSection(object):
                     inp += parsed
 
         # Non-repeatable keywords
-        for attname, realname in self._keywords.iteritems():
+        for attname, realname in self._keywords.items():
             value = self.__dict__[attname]
             if value is not None:
                 if not (type(value) is list and not value):
@@ -155,7 +155,7 @@ class InputSection(object):
                     inp += parsed
 
         # Repeatable keywords
-        for attname, realname in self._repeated_keywords.iteritems():
+        for attname, realname in self._repeated_keywords.items():
             keyword = self.__dict__[attname]
             if keyword is not None:
                 if not (type(keyword) is list and not keyword):
@@ -163,14 +163,14 @@ class InputSection(object):
                     inp += parsed
 
         # Non-repeatable subsections
-        for attname, realname in self._subsections.iteritems():
+        for attname, realname in self._subsections.items():
             value = self.__dict__[attname]
             substring = value._print_input(level + 1)
             if substring != "":
                 inp += substring + "\n"
 
         # Repeatable subsections
-        for attname, realname in self._repeated_subsections.iteritems():
+        for attname, realname in self._repeated_subsections.items():
             for subsection in self.__dict__[attname + "_list"]:
                 if subsection is not None:
                     substring = subsection._print_input(level + 1)

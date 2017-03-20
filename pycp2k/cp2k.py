@@ -1,12 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-
 from pycp2k.classes._CP2K_INPUT1 import _CP2K_INPUT1
 from pycp2k.utilities import print_title, print_text, print_warning, print_error
 import pycp2k.config
 from subprocess import call, check_output, CalledProcessError
 import re
-import numpy as np
 import os
 import time
 
@@ -237,7 +235,6 @@ class CP2K(object):
         with open(self.input_path, 'w') as input_file:
             input_file.write(input_contents)
 
-
     def run(self, print_input=False):
         """Runs the input script."""
 
@@ -269,7 +266,7 @@ class CP2K(object):
         self.write_input_file()
         if print_input:
             print_text(">> CP2K input file:")
-            print self.input
+            print(self.input)
 
         command_list = []
 
@@ -295,12 +292,12 @@ class CP2K(object):
         # Perform syntax check
         print_text(">> Performing syntax check on input file...")
         command_for_syntax_check = " ".join([self.cp2k_command, "-i " + str(self.input_path), "--check"])
-        syntax_result = check_output(command_for_syntax_check, shell=True, cwd=working_directory)
+        syntax_result = (check_output(command_for_syntax_check, shell=True, cwd=working_directory)).decode("utf-8")
         success_regex = re.compile("^SUCCESS", re.MULTILINE)
         match = success_regex.search(syntax_result)
         if match is None:
             print_error("Syntax error in the input file. See the following output for further details.")
-            print syntax_result
+            print(syntax_result)
             raise Exception
 
         # Call the subprocess. shell=True is used to access srun and

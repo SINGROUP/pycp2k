@@ -73,4 +73,4 @@ for cutoff in range(40, 90, 20):
             if match:
                 energies.append(match.groups()[0])
 
-print energies
+print(energies)

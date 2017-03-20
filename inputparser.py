@@ -31,7 +31,7 @@ def validify_section(string):
         string = "NUM" + string
 
     if changed:
-        print "    Section {} replaced with {}".format(original, string)
+        print("    Section {} replaced with {}".format(original, string))
     return string
 
 
@@ -56,7 +56,7 @@ def validify_keyword(string):
         string = "NUM" + string
 
     if changed:
-        print "    Keyword {} replaced with {}".format(original, string)
+        print("    Keyword {} replaced with {}".format(original, string))
 
     string = string.capitalize()
     return string
@@ -245,7 +245,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
         member_name = member_name.replace("+", "PLUS")
         if member_name[0].isdigit():
             member_name = "_" + member_name
-        imports.append("from {0} import {0}".format(member_class_name))
+        imports.append("from .{0} import {0}".format(member_class_name))
 
         # Special case for repeateable sections. Create a dictionary of the
         # subsections and add a function for creating them.
@@ -281,7 +281,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
 
     #---------------------------------------------------------------------------
     # Write a function for adding repeateable sections
-    for repeated in repeated_subsections.iteritems():
+    for repeated in repeated_subsections.items():
         attribute_name = repeated[0]
         attribute_class_name = repeated[1]
         functions += ("    def " + attribute_name + "_add(self, section_parameters=None):\n"
@@ -338,17 +338,14 @@ def main(xml_path):
 
     # Put each class into its own module. This produces manu small files, but
     # this way it it easier for autocompletion to handle everything
-    n_classes = len(class_dictionary)
-    n_class_per_module = 1
-    i_module = 0
-    for class_name, class_body in class_dictionary.iteritems():
+    for class_name, class_body in class_dictionary.items():
         with open('pycp2k/classes/{}.py'.format(class_name), 'w') as file:
             file.write(class_body[0] + "\n\n\n")
             class_body_header = (
                 "class " + class_name + "(InputSection):\n"
             )
-            file.write(class_body_header.encode('utf8'))
-            file.write(class_body[1].encode('utf8'))
+            file.write(class_body_header)
+            file.write(class_body[1])
 
     return (version, revision)
 
