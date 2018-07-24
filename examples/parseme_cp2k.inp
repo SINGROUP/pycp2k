@@ -1,0 +1,55 @@
+&GLOBAL
+  RUN_TYPE ENERGY
+  PRINT_LEVEL LOW
+  PROJECT_NAME cu_mm_bulk
+&END GLOBAL
+&FORCE_EVAL
+  METHOD FIST
+  &SUBSYS
+    &CELL
+      PERIODIC NONE
+      ABC [angstrom] 20 20 20
+    &END CELL
+    &COORD
+      Cu 0.0 0.0 0.0
+      Cu 4.0 0.0 0.0
+      UNIT angstrom
+    &END COORD
+  &END SUBSYS
+  &MM
+    &FORCEFIELD
+      DO_NONBONDED TRUE
+      &NONBONDED
+        &LENNARD-JONES
+          RCUT [angstrom] 25.0
+          SIGMA [angstrom] 3.601
+          ATOMS Cu Cu
+          EPSILON [K_e] 164.56
+        &END LENNARD-JONES
+        &LENNARD-JONES
+          RCUT [angstrom] 25.0
+          SIGMA [angstrom] 3.601
+          ATOMS Pt Pt
+          EPSILON [K_e] 164.56
+        &END LENNARD-JONES
+      &END NONBONDED
+      &CHARGE
+        ATOM Cu
+        CHARGE 0.0
+      &END CHARGE
+      &CHARGE
+        ATOM Pt
+        CHARGE 0.0
+      &END CHARGE
+      &SPLINE
+        EMAX_SPLINE 10000
+      &END SPLINE
+    &END FORCEFIELD
+    &POISSON
+      PERIODIC None
+      &EWALD
+        EWALD_TYPE None
+      &END EWALD
+    &END POISSON
+  &END MM
+&END FORCE_EVAL
