@@ -10,11 +10,9 @@
       PERIODIC NONE
       ABC [angstrom] 20 20 20
     &END CELL
-    &COORD
-      Cu 0.0 0.0 0.0
-      Cu 4.0 0.0 0.0
-      UNIT angstrom
-    &END COORD
+    &TOPOLOGY
+      COORD_FILE_NAME stuff.xyz
+    &END TOPOLOGY
   &END SUBSYS
   &MM
     &FORCEFIELD

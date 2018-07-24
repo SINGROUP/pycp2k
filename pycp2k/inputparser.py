@@ -15,24 +15,13 @@
 from future import standard_library
 standard_library.install_aliases()
 from builtins import object
-import os
-import re
-from io import StringIO
-import logging
-import pickle
+import os, re, logging
 import numpy as np
-#from nomadcore.baseclasses import AbstractBaseParser
-#import nomadcore.configurationreading
-#from cp2kparser.generic.inputparsing import metainfo_data_prefix, metainfo_section_prefix
-
-from pint import UnitRegistry
 import ase
-
 from pycp2k.cp2k import CP2K
 
-ureg = UnitRegistry()
-#logger = logging.getLogger(__name__)
-#logger.setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 #logging.basicConfig(filename='pycp2k.log', level=logging.INFO)
 
 
@@ -40,31 +29,19 @@ class CP2KInputParser():
     """Used to parse out a CP2K input file.
 
     CP2K offers a complete structure for the input in an XML file, which can be
-    printed with the command cp2k --xml. This XML file has been preparsed into
-    a native python object ('CP2KInput' class found in generic.inputparsing)
-    and stored in a python pickle file. It e.g. contains all the default values
-    that are often needed as they are used if the user hasn't specified a
-    settings in the input. This XML file is used to get the default values
-    because it is rather cumbersome to hard code them in the parser itself,
-    especially if there will be lot's of them. Hard coded values will also be
-    more error prone, and would have to be checked for each parser version.
-
-    CP2K input supports including other input files and also
-    supports variables. This is currently not supported, but may be added at
-    some point.
+    printed with the command cp2k --xml. It e.g. contains all the default values.
     """
     def __init__(self):
         """
         Attributes:
-            input_tree: The input structure for this version of CP2K. The
-                structure is already present, in this module it will be filled with
-                data found from the input file.
+            storage_obj: The input structure for this version of CP2K. The
+                structure is defined by the pycp2k.CP2K module, in this module
+                it will be filled with data found from the input file.
             input_lines: List of preprocessed lines in the input. Here all the
                 variables have been stated explicitly and the additional input files have
                 been merged.
         """
         self.storage_obj = CP2K()
-        self.input_tree = None
         self.input_lines = None
         self.unit_mapping = {
             # Distance
@@ -92,18 +69,6 @@ class CP2KInputParser():
         return self.storage_obj
 
 
-    def get_pint_unit_string(self, cp2k_unit_string):
-        """Translate the CP2K unit definition into a valid pint unit.
-        """
-        units = re.split('[\^\-\+\*\d]+', cp2k_unit_string)
-        for unit in units:
-            if unit == "":
-                continue
-            pint_unit = self.unit_mapping.get(unit.upper())
-            if pint_unit is None:
-                return None
-            cp2k_unit_string = cp2k_unit_string.replace(unit, pint_unit)
-        return cp2k_unit_string
 
     def _pythonize_cp2k_names(self, name):
         """handles CP2K special characters:
@@ -117,6 +82,30 @@ class CP2KInputParser():
         name = name.replace("-","_")
         name = name.replace("+","PLUS")
         return name
+
+    def _set_keyword(self, section, keyword, value, full):
+        try:
+            getattr(section, keyword)
+            is_keyword = True
+        except AttributeError:
+            is_keyword = None
+        # If keyword found, put data in there
+        if is_keyword is not None:
+            setattr(section, self._pythonize_cp2k_names(keyword), value)
+        # Keyword not found in the input tree, assuming it is a default keyword
+        else:
+            try:
+                section.Default_keyword
+                is_default_keyword = True
+            except AttributeError:
+                is_default_keyword = False
+            if is_default_keyword:
+                section.Default_keyword.append(full)
+            else:
+                message = "The CP2K input does not contain the keyword {}, and there is no default keyword for the section {}".format(keyword, section)
+                logger.warning(message)
+        return
+
 
     def fill_input_tree(self, file_path):
         """Parses a CP2K input file into an object tree.
@@ -149,7 +138,6 @@ class CP2KInputParser():
         #self.input_tree.root_section.accessed = True
 
         for line in self.input_lines:
-            print(line, section_objects)
 
             # Remove comments and whitespaces
             line = line.split('!', 1)[0].split('#', 1)[0].strip()
@@ -168,11 +156,6 @@ class CP2KInputParser():
                 name = parts[0][1:].upper()
                 # handling - + and 0-9
                 name = self._pythonize_cp2k_names(name)
-                #if name[0].isdigit():
-                #    name = "NUM" + name
-                #name = name.replace("-","_")
-                #name = name.replace("+","PLUS")
-                print(name)
 
                 # creation of section objects
                 if len(section_stack) == 0:
@@ -197,7 +180,8 @@ class CP2KInputParser():
 
                 # Save the section parameters
                 if len(parts) > 1:
-                    setattr(section, self._pythonize_cp2k_names(parts[1].strip().upper()))
+                    setattr(section, "Section_parameters", parts[1].strip())
+                    #setattr(section, "Section_parameters", self._pythonize_cp2k_names(parts[1].strip().upper()))
                     #self.input_tree.set_parameter(path, parts[1].strip().upper())
                     
 
@@ -213,8 +197,10 @@ class CP2KInputParser():
                     keyword_value = ""
                 else:
                     keyword_value = split[1]
-                keyword_name = split[0].upper()
-                setattr(section, self._pythonize_cp2k_names(keyword_name), self._pythonize_cp2k_names(keyword_value))
+                keyword_name = split[0].capitalize()
+                self._set_keyword(section, self._pythonize_cp2k_names(keyword_name), keyword_value, full=line)
+                #setattr(section, self._pythonize_cp2k_names(keyword_name), keyword_value)
+                #setattr(section, self._pythonize_cp2k_names(keyword_name), self._pythonize_cp2k_names(keyword_value))
                 #self.input_tree.set_keyword(path + "/" + keyword_name, keyword_value, line)
         return
 
