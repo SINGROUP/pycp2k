@@ -1,28 +1,6 @@
-# Copyright 2015-2018 Lauri Himanen, Fawzi Mohamed, Ankit Kariryaa
-# 
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
-#   You may obtain a copy of the License at
-# 
-#     http://www.apache.org/licenses/LICENSE-2.0
-# 
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
-
-from future import standard_library
-standard_library.install_aliases()
-from builtins import object
-import os, re, logging
-import numpy as np
-import ase
-from pycp2k.cp2k import CP2K
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-#logging.basicConfig(filename='pycp2k.log', level=logging.INFO)
+import os
+import re
+import logging
 
 
 class CP2KInputParser():
@@ -30,18 +8,18 @@ class CP2KInputParser():
 
     CP2K offers a complete structure for the input in an XML file, which can be
     printed with the command cp2k --xml. It e.g. contains all the default values.
+
+    Attributes:
+        storage_obj: The input structure for this version of CP2K. The
+            structure is defined by the pycp2k.CP2K module, in this module
+            it will be filled with data found from the input file.
+        input_lines: List of preprocessed lines in the input. Here all the
+            variables have been stated explicitly and the additional input files have
+            been merged.
     """
     def __init__(self):
         """
-        Attributes:
-            storage_obj: The input structure for this version of CP2K. The
-                structure is defined by the pycp2k.CP2K module, in this module
-                it will be filled with data found from the input file.
-            input_lines: List of preprocessed lines in the input. Here all the
-                variables have been stated explicitly and the additional input files have
-                been merged.
         """
-        self.storage_obj = CP2K()
         self.input_lines = None
         self.unit_mapping = {
             # Distance
@@ -58,32 +36,38 @@ class CP2KInputParser():
             "WAVENUMBER_T": None,
         }
 
-    def parse(self, filepath):
+    def parse(self, cp2kcalc, filepath):
+        """
+        Args:
+            cp2kcalc(pycp2k.cp2k.CP2K): The CP2K object into which the input is
+                parsed.
+            filepath(str): Path to the CP2K input file.
+        """
+        self.storage_obj = cp2kcalc
 
         # Preprocess to spell out variables and to include stuff from other
         # files
         self.preprocess_input(filepath)
-        
+
         # Gather the information from the input file
         self.fill_input_tree(filepath)
         return self.storage_obj
 
-
-
     def _pythonize_cp2k_names(self, name):
         """handles CP2K special characters:
            python cannot handle variables with
-                   - 
-                   + 
+                   -
+                   +
            and starting 0-9
         """
         if name[0].isdigit():
             name = "NUM" + name
-        name = name.replace("-","_")
-        name = name.replace("+","PLUS")
+        name = name.replace("-", "_")
+        name = name.replace("+", "PLUS")
         return name
 
-    def _set_keyword(self, section, keyword, value, full):
+    def _set_keyword(self, section, keyword, value, path, full):
+
         try:
             getattr(section, keyword)
             is_keyword = True
@@ -102,10 +86,9 @@ class CP2KInputParser():
             if is_default_keyword:
                 section.Default_keyword.append(full)
             else:
-                message = "The CP2K input does not contain the keyword {}, and there is no default keyword for the section {}".format(keyword, section)
-                logger.warning(message)
+                message = "The section {} does not contain the keyword {}, and there is no default keyword for this section".format(path,  keyword)
+                logging.warning(message)
         return
-
 
     def fill_input_tree(self, file_path):
         """Parses a CP2K input file into an object tree.
@@ -136,6 +119,7 @@ class CP2KInputParser():
         section_stack = []
         section_objects = []
         #self.input_tree.root_section.accessed = True
+        path = ""
 
         for line in self.input_lines:
 
@@ -150,6 +134,8 @@ class CP2KInputParser():
             if line.upper().startswith('&END'):
                 section_stack.pop()
                 section_objects.pop()
+                if len(section_stack) > 0:
+                    section = section_objects[-1]
             # Section starts
             elif line[0] == '&':
                 parts = line.split(' ', 1)
@@ -157,7 +143,7 @@ class CP2KInputParser():
                 # handling - + and 0-9
                 name = self._pythonize_cp2k_names(name)
 
-                # creation of section objects
+                # Creation of section objects
                 if len(section_stack) == 0:
                     parent_section = self.storage_obj.CP2K_INPUT
                 else:
@@ -168,6 +154,7 @@ class CP2KInputParser():
                     section = getattr(parent_section, name+"_add")()
                 section_objects.append(section)
                 section_stack.append(name)
+
                 # Form the path
                 path = ""
                 for index, item in enumerate(section_stack):
@@ -175,15 +162,9 @@ class CP2KInputParser():
                         path += '/'
                     path += item
 
-                # Mark the section as accessed.
-                #self.input_tree.set_section_accessed(path)
-
                 # Save the section parameters
                 if len(parts) > 1:
                     setattr(section, "Section_parameters", parts[1].strip())
-                    #setattr(section, "Section_parameters", self._pythonize_cp2k_names(parts[1].strip().upper()))
-                    #self.input_tree.set_parameter(path, parts[1].strip().upper())
-                    
 
             # Ignore variables and includes that might still be here for some
             # reason
@@ -198,10 +179,8 @@ class CP2KInputParser():
                 else:
                     keyword_value = split[1]
                 keyword_name = split[0].capitalize()
-                self._set_keyword(section, self._pythonize_cp2k_names(keyword_name), keyword_value, full=line)
-                #setattr(section, self._pythonize_cp2k_names(keyword_name), keyword_value)
-                #setattr(section, self._pythonize_cp2k_names(keyword_name), self._pythonize_cp2k_names(keyword_value))
-                #self.input_tree.set_keyword(path + "/" + keyword_name, keyword_value, line)
+
+                self._set_keyword(section, self._pythonize_cp2k_names(keyword_name), keyword_value, path, full=line)
         return
 
     def preprocess_input(self, filepath):
@@ -226,7 +205,7 @@ class CP2KInputParser():
                 filepath = os.path.join(basedir, includepath)
                 filepath = os.path.abspath(filepath)
                 if not os.path.isfile(filepath):
-                    logger.warning("Could not find the include file '{}' stated in the CP2K input file. Continuing without it.".format(filepath))
+                    logging.warning("Could not find the include file '{}' stated in the CP2K input file. Continuing without it.".format(filepath))
                     continue
 
                 # Get the content from include file
@@ -248,7 +227,7 @@ class CP2KInputParser():
                 name = components[1]
                 value = components[2]
                 variables[name] = value
-                logger.debug("Variable '{}' found with value '{}'".format(name, value))
+                logging.debug("Variable '{}' found with value '{}'".format(name, value))
             else:
                 input_set_removed.append(line)
 
@@ -273,7 +252,7 @@ class CP2KInputParser():
                     continue
                 value = variables.get(name)
                 if not value:
-                    logger.error("Value for variable '{}' not set.".format(name))
+                    logging.error("Value for variable '{}' not set.".format(name))
                     continue
                 len_value = len(value)
                 len_name = len(name)
@@ -287,5 +266,3 @@ class CP2KInputParser():
 
         self.input_lines = input_variables_replaced
         return self.input_lines
-
-

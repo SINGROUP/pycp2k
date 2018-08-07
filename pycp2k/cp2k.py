@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from pycp2k.classes._CP2K_INPUT1 import _CP2K_INPUT1
 from pycp2k.utilities import print_title, print_text, print_warning, print_error
+from pycp2k.inputparser import CP2KInputParser
 import pycp2k.config
 from subprocess import call, check_output, CalledProcessError
 import re
@@ -9,7 +10,6 @@ import os
 import time
 
 
-#===============================================================================
 class CP2K(object):
     """Class for creating and running CP2K calculations.
 
@@ -88,6 +88,17 @@ class CP2K(object):
         self.mpi_command = pycp2k.config.mpi_default_command
         self.old_input = None
         self.new_input = None
+
+    def parse(self, filepath):
+        """Parses an existing CP2K input file into this object. Will overwrite
+        things in the current object tree.
+
+        Args:
+            filepath(str): Path to a CP2K input file. The input file should be
+            compatible with the CP2K version specified when installing pycp2k.
+        """
+        inputparser = CP2KInputParser()
+        inputparser.parse(self, filepath)
 
     @property
     def output_path(self):
@@ -224,16 +235,27 @@ class CP2K(object):
         else:
             poisson.Periodic = pbc[0]*"X" + pbc[1]*"Y" + pbc[2]*"Z"
 
-    def write_input_file(self):
+    def write_input_file(self, filepath=None):
+        """Creates an input file for CP2K executable from the object tree
+        defined in CP2K_INPUT.
+
+        Args:
+            filepath(str): The filepath of where the input file will be written
+                to.
+        """
+        if filepath is None:
+            filepath = self.input_path
+
+        # Write the file
+        with open(filepath, 'w') as input_file:
+            input_file.write(self.get_input_string())
+
+    def get_input_string(self):
         """Creates an input file for CP2K executable from the object tree
         defined in CP2K_INPUT.
         """
-        #self.old_input = self.new_input
-        input_contents = self.CP2K_INPUT._print_input(-1)
-
-        # Write the file
-        with open(self.input_path, 'w') as input_file:
-            input_file.write(input_contents)
+        input_string = self.CP2K_INPUT._print_input(-1)
+        return input_string
 
     def run(self, print_input=False):
         """Runs the input script."""

@@ -1,32 +1,17 @@
-"""Reads CP2K input file
-and writes it out through the module
-pycp2k.CP2K
-
-The resulting content should match the
-given input file.
 """
+An example on how to read existing CP2K input files directly into the CP2K
+object.
+"""
+from pycp2k import CP2K
 
-from pycp2k import CP2KInputParser
+# The CP2K object is normally initialized
+calc = CP2K()
 
-filename = "si_bulk.inp"
-print("CP2K INPUT FILE", filename)
+# This function tries to read the input file in the given path and places its
+# contents to the input tree. Notice that this will overwrite any already set
+# inputs.
+calc.parse("parse_example.inp")
 
-inpparser = CP2KInputParser()
-
-calc = inpparser.parse(filename)
-
-print("info about input parser")
-print(inpparser)
-
-print("cp2k info storage \n")
-print(inpparser.storage_obj)
-
-print("raw input \n")
-print(inpparser.input_lines)
-
-
-calc.working_directory = "."
-calc.project_name = "rewritten_cp2k"
-calc.write_input_file()
-
-print("file written TO", calc.project_name + ".inp")
+# The calculation can be modified and run after reading the input file
+calc.CP2K_INPUT.GLOBAL.Project_name = "modified"
+calc.write_input_file("parse_example_modified.inp")
