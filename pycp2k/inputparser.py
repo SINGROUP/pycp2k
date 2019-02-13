@@ -4,18 +4,7 @@ import logging
 
 
 class CP2KInputParser():
-    """Used to parse out a CP2K input file.
-
-    CP2K offers a complete structure for the input in an XML file, which can be
-    printed with the command cp2k --xml. It e.g. contains all the default values.
-
-    Attributes:
-        storage_obj: The input structure for this version of CP2K. The
-            structure is defined by the pycp2k.CP2K module, in this module
-            it will be filled with data found from the input file.
-        input_lines: List of preprocessed lines in the input. Here all the
-            variables have been stated explicitly and the additional input files have
-            been merged.
+    """Used to parse a CP2K input file into an object hierarchy.
     """
     def __init__(self):
         """
@@ -69,20 +58,32 @@ class CP2KInputParser():
     def _set_keyword(self, section, keyword, value, path, full):
 
         try:
-            getattr(section, keyword)
+            keyword_attr = getattr(section, keyword)
             is_keyword = True
         except AttributeError:
-            is_keyword = None
-        # If keyword found, put data in there
-        if is_keyword is not None:
-            setattr(section, self._pythonize_cp2k_names(keyword), value)
+            is_keyword = False
+        # If keyword found, save it. If it can be repeated, then add it to a list.
+        if is_keyword:
+            keyword_attr_name = self._pythonize_cp2k_names(keyword)
+
+            # If keyword can be repeated, then add it to list
+            if keyword_attr_name in section._repeated_keywords:
+                if isinstance(keyword_attr, list):
+                    keyword_attr.append(value)
+                else:
+                    keyword_attr = [keyword_attr, value]
+            # If keyword cannot be repeated, replace it
+            else:
+                setattr(section, self._pythonize_cp2k_names(keyword), value)
         # Keyword not found in the input tree, assuming it is a default keyword
         else:
+            # See if section allows a default keyword
             try:
                 section.Default_keyword
                 is_default_keyword = True
             except AttributeError:
                 is_default_keyword = False
+            # If default keyword allowed, add it to list
             if is_default_keyword:
                 section.Default_keyword.append(full)
             else:
