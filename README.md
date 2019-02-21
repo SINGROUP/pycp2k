@@ -126,13 +126,13 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    commands be. For local setup use:
 
    ```
-   python setup.py install --user
+   python manual_setup.py install --user
    ```
 
    For system-wide setup use:
 
    ```
-   sudo python setup.py install
+   sudo python manual_setup.py install
    ```
 5. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
    PYTHONPATH system variable. It should be by default. You can check what
@@ -172,7 +172,7 @@ with the appropriate changes.
       using.
 
       ```
-      python setup.py install --user
+      python manual_setup.py install --user
       ```
 
     4. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
@@ -184,46 +184,26 @@ with the appropriate changes.
     print "\n".join(sys.path)
     ```
 
-2. Usage (MPI parallel run on Triton):
-   1. Write the python script for your simulation. See the examples folder for
-      inspiration.
-   2. Make sure that you have the files for potentials and basis sets
-      available. For testing you can e.g. use the files *GTH\_POTENTIALS* and
-      *BASIS\_SET* found in the examples folder.
-   2. Run the python script with a batch file. The batch file could look
-      something like this:
+<a name="triton"></a>
+5\. Installation through pip
+--------------------------------------------------
 
-      ```sh
-      #!/bin/sh
-      #SBATCH -n 12
-      #SBATCH -N 1
-      #SBATCH --time=10:00
-      #SBATCH --mem-per-cpu=500
+There is a default implementation available which does not require any user input.
+CP2K version 5.1 is assumed (it should work with most other versions). The cp2k executable
+is called "cp2k.popt" and no mpi-command is given. If you want to change the
+name of the executable and the mpi-command, please modify pycp2k.config.py.
 
-      module load cp2k python ase
-      export PYTHONPATH=$PYTHONPATH:/full/path/to/pycp2k/package
-      python example_si_triton.py
+Otherwise, the installation is as easy as:
+
       ```
-      NOTE: The actual module names for cp2k, ase and python will depend on the
-      current triton setup. The module names mentioned here are just dummy
-      ones. You can find the available module with command *module avail*
+      pip install pycp2k
+      ```
 
-      NOTE: In each batch file you will have to tell the program where the
-      PYCP2K package is located with the export command. Set this path to point
-      to the git repository which you cloned in installation step ii.
+If version 5.1 does not work for you, we recommend a manual installation (see above).
 
-      NOTE: In the batch file you specify the number of processes that are
-      allocated for you. This doesn't automatically mean that MPI is
-      initialized with that many processes. You must specify the number of mpi
-      processes in the python script with calculator attribute
-      *mpi\_n\_processes*
-
-      NOTE: The nodes are constrained to xeon/xeonib because the default
-      version of cp2k on triton did not correctly run on opteron nodes. This
-      may have changed.
 
 <a name="notes"></a>
-5\. Implementation Notes
+6\. Implementation Notes
 --------------------------------------------------
 
 1. All section names are in uppercase to prevent clashes with python keywords
@@ -249,6 +229,6 @@ with the appropriate changes.
    scripts. However, the default name will be used in the input file.
 
 <a name="contact"></a>
-6\. Contact
+7\. Contact
 --------------------------------------------------
 If you have any issues, or general questions regarding the package, please use github's issue system. Just simply open a new issue and put your message there. This way the discussion is open for other users, and may also help them in any possible problems.
