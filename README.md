@@ -195,9 +195,9 @@ name of the executable and the mpi-command, please modify pycp2k.config.py.
 
 Otherwise, the installation is as easy as:
 
-      ```python
-      pip install pycp2k
-      ```
+```python
+pip install pycp2k
+```
 
 If version 5.1 does not work for you, we recommend a manual installation (see above).
 
