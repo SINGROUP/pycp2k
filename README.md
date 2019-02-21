@@ -190,8 +190,8 @@ with the appropriate changes.
 
 There is a default implementation available which does not require any user input.
 CP2K version 5.1 is assumed (it should work with most other versions). The cp2k executable
-is called "cp2k.popt" and no mpi-command is given. If you want to change the
-name of the executable and the mpi-command, please modify pycp2k.config.py.
+is called *cp2k.popt* and no mpi-command is given. If you want to change the
+name of the executable and the mpi-command, please modify pycp2k/config.py.
 
 Otherwise, the installation is as easy as:
 
