@@ -279,9 +279,9 @@ class CP2K(object):
         build_revision = pycp2k.config.build_revision
 
         if run_version != build_version:
-            print_warning("The CP2K version does not match the version for which PYCP2K was configured. This will affect the availability of keywords and sections in the input tree!")
+            print_warning("The CP2K version does not match the version for which PYCP2K was configured ({}). This migh affect the availability of keywords and sections in the input tree!".format(build_version))
         elif run_revision != build_revision:
-            print_warning("The CP2K revision does not match the version for which PYCP2K was configured. This will affect the availability of keywords and sections in the input tree!")
+            print_warning("The CP2K revision does not match the version for which PYCP2K was configured ({}). This might affect the availability of keywords and sections in the input tree!".format(build_revision))
 
         # Write input file and possibly show it
         print_text(">> Creating CP2K input file...")

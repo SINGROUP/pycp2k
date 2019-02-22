@@ -5,18 +5,13 @@
 *~
 *.xml
 *.html
-pycp2k/classes/*.py
-pycp2k/classes/*.pyc
 pycp2k/parsedclasses.pyc
-pycp2k/config.py
 pycp2k.egg-info/
 build/
 dist/
 examples/*.inp
 examples/*.out
 examples/*.xyz
-
-!pycp2k/classes/__init__.py
 
 examples/*.ener
 examples/*.inp

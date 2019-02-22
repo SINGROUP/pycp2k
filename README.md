@@ -3,8 +3,9 @@ PYCP2K: a python interface to CP2K
 
 1. [Introduction](#introduction)
 2. [Example](#example)
-3. [Installation on Linux Desktop](#linux)
-4. [Installation on Triton](#triton)
+3. [Installation through pip](#pip)
+3. [Manual installation](#manual)
+4. [Installation on HPC](#triton)
 5. [Implementation Notes](#notes)
 6. [Contact](#contact)
 
@@ -98,53 +99,58 @@ examples, look at the examples folder.
     calc.write_input_file()
     calc.run()
 ```
-<a name="linux"></a>
-3\. Installation on Linux Desktop
+
+<a name="pip"></a>
+3\. Installation through pip
 --------------------------------------------------
-These installation instructions were tested on Ubuntu 14.04 x64:
 
-1. This package depends on the [numpy
-   package](http://www.scipy.org/install.html). Please install it first.
-2. If you want to use ASE's structure creation or loading, install
-   [ASE](https://wiki.fysik.dtu.dk/ase/). Not mandatory.
-2. Pull this repository to any location on your computer:
+There is a default implementation available which does not require any user input.
+CP2K version 5.1 is assumed (it should work with most other versions). The cp2k executable
+is called *cp2k.popt* and no mpi-command is given. If you want to change the
+name of the executable and the mpi-command, please modify pycp2k/config.py.
+
+Otherwise, the installation is as easy as:
+
+```python
+pip install pycp2k
+```
+
+If version 5.1 does not work for you, we recommend a manual installation (see
+below).
+
+
+<a name="manual"></a>
+4\. Manual installation
+--------------------------------------------------
+These installation instructions were tested on Ubuntu 16.04 x64:
+
+1. Pull this repository to any location on your computer:
 
    ```
-   git clone https://github.com/SINGROUP/pycp2k.git
+   git clone ---depth 1 https://github.com/SINGROUP/pycp2k.git
    ```
 
-3. The correct input structure is created from the .xml file that can be
+2. The correct input structure is created from the .xml file that can be
    created by calling the CP2K executable with flag --xml. During the setup you
    will have the option of creating the .xml file by using a CP2K executable on
    your computer, or by using a pre-existing .xml file. The .xml files may
-   differ between CP2K versions, and if you change CP2K version at some point,
-   you should rerun this installation. If you at some point update the code
-   from git, you should also rerun this installation.
-4. Install the package by running the setup script in terminal. During setup
+   differ between CP2K versions, and if you change CP2K version or update
+   pycp2k, you may need to rerun this installation. When doing a reinstall, it
+   is best to remove the old class hiearchy by deleting the folder
+   *pycp2k/pycp2k/classes*.
+
+3. Install the package by running the setup script in terminal. During setup
    you will be asked how you want to create the input structure (using
    executable or existing xml file) and what should the default CP2K and MPI
-   commands be. For local setup use:
+   commands be. For setup use (use the *--user* flag when necessary to avoid
+   issues with root access):
 
    ```
-   python setup.py install --user
-   ```
-
-   For system-wide setup use:
-
-   ```
-   sudo python setup.py install
-   ```
-5. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
-   PYTHONPATH system variable. It should be by default. You can check what
-   paths are available in python by running:
-
-   ```python
-   import sys
-   print "\n".join(sys.path)
+   python setup_manual.py install
    ```
 
 <a name="triton"></a>
-4\. Installation on Triton
+5\. Installation on HPC
 --------------------------------------------------
 
 These instructions were made for and tested on Triton, the computing cluster at
@@ -162,68 +168,24 @@ with the appropriate changes.
    2. Clone this repository to somewhere in your work directory:
 
       ```
-      git clone https://github.com/SINGROUP/pycp2k.git
+      git clone --depth 1 https://github.com/SINGROUP/pycp2k.git
       ```
 
-   3. Install the package locally. If you loaded the cp2k module you should be
-      able to create the input structure from the cp2k executable. When the
-      setup asks for default MPI executable provide choose either *srun
-      --mpi=openmpi* or *srun --mpi=pmi2* depending on which MPI library you're
-      using.
+   3. Install the package locally with (use the *--user* flag when necessary to
+      avoid issues with root access):
 
       ```
-      python setup.py install --user
+      python setup_manual.py install
       ```
 
-    4. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
-    PYTHONPATH system variable. It should be by default. You can check what
-    paths are available in python by running:
+      If you loaded the cp2k module you should be able to create the input
+      structure from the cp2k executable. When the setup asks for default MPI
+      executable provide choose either *srun --mpi=openmpi* or *srun
+      --mpi=pmi2* depending on which MPI library you're using.
 
-    ```python
-    import sys
-    print "\n".join(sys.path)
-    ```
-
-2. Usage (MPI parallel run on Triton):
-   1. Write the python script for your simulation. See the examples folder for
-      inspiration.
-   2. Make sure that you have the files for potentials and basis sets
-      available. For testing you can e.g. use the files *GTH\_POTENTIALS* and
-      *BASIS\_SET* found in the examples folder.
-   2. Run the python script with a batch file. The batch file could look
-      something like this:
-
-      ```sh
-      #!/bin/sh
-      #SBATCH -n 12
-      #SBATCH -N 1
-      #SBATCH --time=10:00
-      #SBATCH --mem-per-cpu=500
-
-      module load cp2k python ase
-      export PYTHONPATH=$PYTHONPATH:/full/path/to/pycp2k/package
-      python example_si_triton.py
-      ```
-      NOTE: The actual module names for cp2k, ase and python will depend on the
-      current triton setup. The module names mentioned here are just dummy
-      ones. You can find the available module with command *module avail*
-
-      NOTE: In each batch file you will have to tell the program where the
-      PYCP2K package is located with the export command. Set this path to point
-      to the git repository which you cloned in installation step ii.
-
-      NOTE: In the batch file you specify the number of processes that are
-      allocated for you. This doesn't automatically mean that MPI is
-      initialized with that many processes. You must specify the number of mpi
-      processes in the python script with calculator attribute
-      *mpi\_n\_processes*
-
-      NOTE: The nodes are constrained to xeon/xeonib because the default
-      version of cp2k on triton did not correctly run on opteron nodes. This
-      may have changed.
 
 <a name="notes"></a>
-5\. Implementation Notes
+6\. Implementation Notes
 --------------------------------------------------
 
 1. All section names are in uppercase to prevent clashes with python keywords
@@ -249,6 +211,9 @@ with the appropriate changes.
    scripts. However, the default name will be used in the input file.
 
 <a name="contact"></a>
-6\. Contact
+7\. Contact
 --------------------------------------------------
-If you have any issues, or general questions regarding the package, please use github's issue system. Just simply open a new issue and put your message there. This way the discussion is open for other users, and may also help them in any possible problems.
+If you have any issues, or general questions regarding the package, please use
+github's issue system. Just simply open a new issue and put your message there.
+This way the discussion is open for other users, and may also help them in any
+possible problems.
