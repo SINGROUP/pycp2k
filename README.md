@@ -3,8 +3,9 @@ PYCP2K: a python interface to CP2K
 
 1. [Introduction](#introduction)
 2. [Example](#example)
-3. [Installation on Linux Desktop](#linux)
-4. [Installation on Triton](#triton)
+3. [Installation through pip](#pip)
+3. [Manual installation](#manual)
+4. [Installation on HPC](#triton)
 5. [Implementation Notes](#notes)
 6. [Contact](#contact)
 
@@ -118,55 +119,38 @@ If version 5.1 does not work for you, we recommend a manual installation (see
 below).
 
 
-<a name="linux"></a>
-4\. Manual Installation on Linux Desktop
+<a name="manual"></a>
+4\. Manual installation
 --------------------------------------------------
 These installation instructions were tested on Ubuntu 16.04 x64:
 
-1. This package depends on the [numpy
-   package](http://www.scipy.org/install.html). Please install it first.
-2. If you want to use ASE's structure creation or loading, install
-   [ASE](https://wiki.fysik.dtu.dk/ase/). Not mandatory.
-2. Pull this repository to any location on your computer:
+1. Pull this repository to any location on your computer:
 
    ```
-   git clone https://github.com/SINGROUP/pycp2k.git
+   git clone ---depth 1 https://github.com/SINGROUP/pycp2k.git
    ```
 
-3. The correct input structure is created from the .xml file that can be
+2. The correct input structure is created from the .xml file that can be
    created by calling the CP2K executable with flag --xml. During the setup you
    will have the option of creating the .xml file by using a CP2K executable on
    your computer, or by using a pre-existing .xml file. The .xml files may
-   differ between CP2K versions, and if you change CP2K version at some point,
-   you should rerun this installation. If you at some point update pycp2k or
-   CP2k, you may also need to rerun this installation. When doing a reinstall,
-   it is best to remove the old class hiearchy by deleting the folder
+   differ between CP2K versions, and if you change CP2K version or update
+   pycp2k, you may need to rerun this installation. When doing a reinstall, it
+   is best to remove the old class hiearchy by deleting the folder
    *pycp2k/pycp2k/classes*.
-4. Install the package by running the setup script in terminal. During setup
+
+3. Install the package by running the setup script in terminal. During setup
    you will be asked how you want to create the input structure (using
    executable or existing xml file) and what should the default CP2K and MPI
-   commands be. For local setup use:
+   commands be. For setup use (use the *--user* flag when necessary to avoid
+   issues with root access):
 
    ```
-   python setup_manual.py install --user
-   ```
-
-   For system-wide setup use:
-
-   ```
-   sudo python setup_manual.py install
-   ```
-5. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
-   PYTHONPATH system variable. It should be by default. You can check what
-   paths are available in python by running:
-
-   ```python
-   import sys
-   print "\n".join(sys.path)
+   python setup_manual.py install
    ```
 
 <a name="triton"></a>
-5\. Installation on Triton
+5\. Installation on HPC
 --------------------------------------------------
 
 These instructions were made for and tested on Triton, the computing cluster at
@@ -184,27 +168,22 @@ with the appropriate changes.
    2. Clone this repository to somewhere in your work directory:
 
       ```
-      git clone https://github.com/SINGROUP/pycp2k.git
+      git clone --depth 1 https://github.com/SINGROUP/pycp2k.git
       ```
 
-   3. Install the package locally. If you loaded the cp2k module you should be
-      able to create the input structure from the cp2k executable. When the
-      setup asks for default MPI executable provide choose either *srun
-      --mpi=openmpi* or *srun --mpi=pmi2* depending on which MPI library you're
-      using.
+   3. Install the package locally with (use the *--user* flag when necessary to
+      avoid issues with root access):
 
       ```
-      python setup_manual.py install --user
+      python setup_manual.py install
       ```
 
-    4. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
-    PYTHONPATH system variable. It should be by default. You can check what
-    paths are available in python by running:
+      If you loaded the cp2k module you should be able to create the input
+      structure from the cp2k executable. When the setup asks for default MPI
+      executable provide choose either *srun --mpi=openmpi* or *srun
+      --mpi=pmi2* depending on which MPI library you're using.
 
-    ```python
-    import sys
-    print "\n".join(sys.path)
-    ```
+
 <a name="notes"></a>
 6\. Implementation Notes
 --------------------------------------------------
