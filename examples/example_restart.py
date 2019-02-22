@@ -27,7 +27,7 @@ FORCEFIELD = FORCE_EVAL.MM.FORCEFIELD
 
 #===============================================================================
 # RESTART
-EXT_RESTART.Restart_file_name = "./qmmmwater-1.restart"
+EXT_RESTART.Restart_file_name = "./restart.restart"
 
 #===============================================================================
 # GLOBAL

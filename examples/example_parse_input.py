@@ -10,7 +10,7 @@ calc = CP2K()
 # This function tries to read the input file in the given path and places its
 # contents to the input tree. Notice that this will overwrite any already set
 # inputs.
-calc.parse("tempate.in")
+calc.parse("template.in")
 
 # The calculation can be modified and run after reading the input file
 calc.CP2K_INPUT.GLOBAL.Project_name = "modified"

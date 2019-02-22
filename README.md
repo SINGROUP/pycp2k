@@ -98,10 +98,30 @@ examples, look at the examples folder.
     calc.write_input_file()
     calc.run()
 ```
-<a name="linux"></a>
-3\. Installation on Linux Desktop
+
+<a name="pip"></a>
+3\. Installation through pip
 --------------------------------------------------
-These installation instructions were tested on Ubuntu 14.04 x64:
+
+There is a default implementation available which does not require any user input.
+CP2K version 5.1 is assumed (it should work with most other versions). The cp2k executable
+is called *cp2k.popt* and no mpi-command is given. If you want to change the
+name of the executable and the mpi-command, please modify pycp2k/config.py.
+
+Otherwise, the installation is as easy as:
+
+```python
+pip install pycp2k
+```
+
+If version 5.1 does not work for you, we recommend a manual installation (see
+below).
+
+
+<a name="linux"></a>
+4\. Manual Installation on Linux Desktop
+--------------------------------------------------
+These installation instructions were tested on Ubuntu 16.04 x64:
 
 1. This package depends on the [numpy
    package](http://www.scipy.org/install.html). Please install it first.
@@ -118,21 +138,23 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    will have the option of creating the .xml file by using a CP2K executable on
    your computer, or by using a pre-existing .xml file. The .xml files may
    differ between CP2K versions, and if you change CP2K version at some point,
-   you should rerun this installation. If you at some point update the code
-   from git, you should also rerun this installation.
+   you should rerun this installation. If you at some point update pycp2k or
+   CP2k, you may also need to rerun this installation. When doing a reinstall,
+   it is best to remove the old class hiearchy by deleting the folder
+   *pycp2k/pycp2k/classes*.
 4. Install the package by running the setup script in terminal. During setup
    you will be asked how you want to create the input structure (using
    executable or existing xml file) and what should the default CP2K and MPI
    commands be. For local setup use:
 
    ```
-   python manual_setup.py install --user
+   python setup_manual.py install --user
    ```
 
    For system-wide setup use:
 
    ```
-   sudo python manual_setup.py install
+   sudo python setup_manual.py install
    ```
 5. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
    PYTHONPATH system variable. It should be by default. You can check what
@@ -144,7 +166,7 @@ These installation instructions were tested on Ubuntu 14.04 x64:
    ```
 
 <a name="triton"></a>
-4\. Installation on Triton
+5\. Installation on Triton
 --------------------------------------------------
 
 These instructions were made for and tested on Triton, the computing cluster at
@@ -172,7 +194,7 @@ with the appropriate changes.
       using.
 
       ```
-      python manual_setup.py install --user
+      python setup_manual.py install --user
       ```
 
     4. Make sure that the path ~/.local/lib/python2.x/site-packages is in your
@@ -183,25 +205,6 @@ with the appropriate changes.
     import sys
     print "\n".join(sys.path)
     ```
-
-<a name="triton"></a>
-5\. Installation through pip
---------------------------------------------------
-
-There is a default implementation available which does not require any user input.
-CP2K version 5.1 is assumed (it should work with most other versions). The cp2k executable
-is called *cp2k.popt* and no mpi-command is given. If you want to change the
-name of the executable and the mpi-command, please modify pycp2k/config.py.
-
-Otherwise, the installation is as easy as:
-
-```python
-pip install pycp2k
-```
-
-If version 5.1 does not work for you, we recommend a manual installation (see above).
-
-
 <a name="notes"></a>
 6\. Implementation Notes
 --------------------------------------------------
@@ -231,4 +234,7 @@ If version 5.1 does not work for you, we recommend a manual installation (see ab
 <a name="contact"></a>
 7\. Contact
 --------------------------------------------------
-If you have any issues, or general questions regarding the package, please use github's issue system. Just simply open a new issue and put your message there. This way the discussion is open for other users, and may also help them in any possible problems.
+If you have any issues, or general questions regarding the package, please use
+github's issue system. Just simply open a new issue and put your message there.
+This way the discussion is open for other users, and may also help them in any
+possible problems.
