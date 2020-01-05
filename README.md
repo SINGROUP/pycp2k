@@ -127,7 +127,7 @@ These installation instructions were tested on Ubuntu 16.04 x64:
 1. Pull this repository to any location on your computer:
 
    ```
-   git clone ---depth 1 https://github.com/SINGROUP/pycp2k.git
+   git clone --depth 1 https://github.com/SINGROUP/pycp2k.git
    ```
 
 2. The correct input structure is created from the .xml file that can be
