@@ -16,6 +16,6 @@ class _reftraj1(InputSection):
         self.MSD = _msd1()
         self.PRINT = _print10()
         self._name = "REFTRAJ"
-        self._keywords = {'Cell_file_name': 'CELL_FILE_NAME', 'Traj_file_name': 'TRAJ_FILE_NAME', 'Eval_energy_forces': 'EVAL_ENERGY_FORCES', 'Variable_volume': 'VARIABLE_VOLUME', 'First_snapshot': 'FIRST_SNAPSHOT', 'Last_snapshot': 'LAST_SNAPSHOT', 'Stride': 'STRIDE'}
+        self._keywords = {'Cell_file_name': 'CELL_FILE_NAME', 'Traj_file_name': 'TRAJ_FILE_NAME', 'Eval_energy_forces': 'EVAL_ENERGY_FORCES', 'Eval_forces': 'EVAL_FORCES', 'Variable_volume': 'VARIABLE_VOLUME', 'First_snapshot': 'FIRST_SNAPSHOT', 'Last_snapshot': 'LAST_SNAPSHOT', 'Stride': 'STRIDE'}
         self._subsections = {'MSD': 'MSD', 'PRINT': 'PRINT'}
 
