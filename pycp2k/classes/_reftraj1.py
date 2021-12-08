@@ -13,6 +13,7 @@ class _reftraj1(InputSection):
         self.Last_snapshot = None
         self.Stride = None
         self.Eval_energy_forces = None
+        self.Eval_forces = None
         self.MSD = _msd1()
         self.PRINT = _print10()
         self._name = "REFTRAJ"
