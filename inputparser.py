@@ -46,7 +46,11 @@ def validify_keyword(string):
     """
     original = string
     changed = False
-
+    
+    if string == None:
+        print("    Keyword None replaced with NO_DEFAULT")
+        return "NO_DEFAULT"
+    
     if "-" in string:
         changed = True
         string = string.replace("-", "_")
@@ -186,7 +190,7 @@ def recursive_class_creation(section, level, class_dictionary, version_dictionar
             newname = validify_keyword(name)
             if keytype == "default":
                 default_name = newname
-                if name.startswith("__"):
+                if  name != None and name.startswith("__"):
                     visible = False
 
         # Now store the keywords as class attributes
