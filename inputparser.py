@@ -30,6 +30,10 @@ def validify_section(string):
         changed = True
         string = "NUM" + string
 
+    if '[' in string:
+        changed = True
+        string = string.replace("[", "_").replace("]", "")
+
     if changed:
         print("    Section {} replaced with {}".format(original, string))
     return string
@@ -54,6 +58,10 @@ def validify_keyword(string):
     if string[0].isdigit():
         changed = True
         string = "NUM" + string
+
+    if '[' in string:
+        changed = True
+        string = string.replace("[", "_").replace("]", "")
 
     if changed:
         print("    Keyword {} replaced with {}".format(original, string))
